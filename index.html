@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="IRONLOG"/>
+<meta name="theme-color" content="#0a0a14"/>
+<title>IRONLOG</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#0a0a14;min-height:100%;font-family:'Segoe UI',system-ui,sans-serif;color:#e8e8f0;overscroll-behavior:none}
+input,select,button,textarea{font-family:inherit;font-size:14px}
+select option{background:#1a1a2e}
+:root{--cyan:#00d4ff;--purple:#a78bfa;--red:#e74c3c;--orange:#f39c12;--green:#27ae60;--bg:#0a0a14;--card:rgba(255,255,255,.04);--border:rgba(255,255,255,.08)}
+#hdr{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:56px;background:rgba(10,10,20,.97);border-bottom:1px solid rgba(0,212,255,.15);gap:8px;flex-wrap:wrap}
+#logo{display:flex;align-items:center;gap:7px;flex-shrink:0}
+#logoTxt{font-size:18px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#greet{flex:1;min-width:80px}
+#greetName{font-size:12px;font-weight:700}
+#greetSub{font-size:11px;color:#666;margin-top:2px}
+#nav{display:flex;gap:2px}
+.navBtn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 9px;border-radius:6px;border:none;background:transparent;color:#666;cursor:pointer;font-weight:700;letter-spacing:1px;font-size:10px}
+.navBtn.active{background:rgba(0,212,255,.1);color:var(--cyan);box-shadow:inset 0 -2px 0 var(--cyan)}
+#main{margin-top:56px;padding:18px 16px;max-width:720px;margin-left:auto;margin-right:auto}
+.card{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:12px}
+.cardTitle{font-size:12px;font-weight:700;letter-spacing:1px;color:#aaa;text-transform:uppercase;margin-bottom:12px}
+.inp{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#e8e8f0;outline:none}
+.inp:focus{border-color:var(--cyan)}
+label.lbl{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#555;letter-spacing:1px;text-transform:uppercase}
+.btn{padding:9px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#0a0a14;font-weight:900;font-size:13px;cursor:pointer;letter-spacing:1px}
+.btn:disabled{opacity:.4;cursor:default}
+.btn-ghost{padding:8px 14px;border-radius:8px;border:1px solid #333;background:transparent;color:#888;font-size:13px;cursor:pointer}
+.btn-red{padding:5px 10px;border-radius:6px;border:1px solid rgba(231,76,60,.3);background:rgba(231,76,60,.08);color:var(--red);font-size:12px;cursor:pointer}
+.btn-edit{padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#aaa;font-size:12px;cursor:pointer;margin-right:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.gridForm{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.subTabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.subTab{padding:7px 14px;border-radius:8px;border:1px solid #2a2a3e;background:transparent;color:#666;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:1px}
+.subTab.active{background:rgba(0,212,255,.1);color:var(--cyan);border-color:rgba(0,212,255,.3)}
+.styleCard{display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 12px;border-radius:12px;border:2px solid;background:rgba(255,255,255,.03);cursor:pointer;text-align:center;width:100%}
+.styleIcon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{padding:9px 12px;text-align:left;font-size:11px;color:#555;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:rgba(0,212,255,.05)}
+.tbl td{padding:9px 12px;color:#aaa;vertical-align:middle;border-bottom:1px solid rgba(255,255,255,.04)}
+.tblWrap{background:rgba(255,255,255,.02);border-radius:12px;border:1px solid rgba(255,255,255,.07);overflow:hidden;margin-top:12px}
+.tag{font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(0,212,255,.1);color:var(--cyan)}
+.tag2{font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(167,139,250,.1);color:var(--purple)}
+#timerBar{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.65);border-radius:14px;border:1px solid rgba(0,212,255,.2);padding:12px 16px;margin-bottom:14px}
+.exCard{background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.07);overflow:hidden;margin-bottom:10px}
+.exHdr{display:flex;justify-content:space-between;align-items:flex-start;padding:11px 14px;background:rgba(0,212,255,.05);border-bottom:1px solid rgba(0,212,255,.1)}
+.exName{font-size:15px;font-weight:800;letter-spacing:1px}
+.lblBadge{display:inline-block;font-size:11px;font-weight:900;color:var(--purple);background:rgba(167,139,250,.15);padding:1px 7px;border-radius:6px;margin-right:8px}
+.wChip{font-size:11px;font-weight:700;color:var(--orange);background:rgba(243,156,18,.12);padding:2px 6px;border-radius:8px;border:1px solid rgba(243,156,18,.25)}
+.targetChip{font-size:11px;font-weight:700;color:#ff5566;background:rgba(255,85,102,.14);padding:2px 7px;border-radius:8px;border:1px solid rgba(255,85,102,.35)}
+.targetInput{border-color:rgba(255,85,102,.5)!important;color:#ff5566!important;background:rgba(255,85,102,.08)!important}
+.setRow{display:flex;align-items:center;gap:8px;padding:7px 14px;flex-wrap:wrap}
+.prevBadge{font-size:11px;color:var(--orange);background:rgba(243,156,18,.08);padding:2px 6px;border-radius:6px;flex-shrink:0}
+.wInp{width:64px;padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e8f0;font-size:14px;text-align:center;outline:none}
+.doneBtn{width:30px;height:30px;border-radius:7px;border:2px solid #333;background:transparent;color:#555;font-size:15px;cursor:pointer;flex-shrink:0}
+.doneBtn.on{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.1)}
+.ssBlock{border:1px dashed rgba(167,139,250,.4);border-radius:14px;padding:10px;background:rgba(167,139,250,.03);margin-bottom:10px}
+.ssLabel{font-size:11px;font-weight:800;letter-spacing:1px;color:var(--purple);padding:2px 6px 8px;text-transform:uppercase}
+.logCard{background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.07);border-left:3px solid;cursor:pointer;overflow:hidden;margin-bottom:10px}
+.progCard{background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.07);padding:14px 16px;margin-bottom:10px}
+.statGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:14px}
+.statCard{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
+.modalCard{background:rgba(20,20,32,.98);border:1px solid rgba(0,212,255,.25);border-radius:16px;padding:28px 22px;max-width:360px;width:100%;text-align:center}
+.obRoot{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.obCard{background:rgba(15,15,25,.97);border:1px solid rgba(0,212,255,.2);border-radius:20px;padding:32px 24px;max-width:420px;width:100%;text-align:center}
+.bigTitle{font-size:32px;font-weight:900;letter-spacing:5px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.empty{color:#444;font-size:13px;text-align:center;padding:36px 0}
+.hint{font-size:11px;color:#333;padding:4px 14px 8px;font-style:italic}
+.badge{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.fBtn{padding:5px 10px;border-radius:20px;border:1px solid #222;background:transparent;color:#666;cursor:pointer;font-size:11px;font-weight:700}
+.fBtn.active{background:rgba(167,139,250,.15);color:var(--purple);border-color:rgba(167,139,250,.4)}
+.ssBadge{font-size:10px;font-weight:700;color:var(--purple);background:rgba(167,139,250,.12);padding:2px 6px;border-radius:8px;margin-left:6px}
+.pageTitle{font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:14px}
+/* sync status */
+#syncBar{position:fixed;bottom:0;left:0;right:0;z-index:99;padding:6px 16px;font-size:12px;font-weight:700;text-align:center;transition:all .3s;display:none}
+#syncBar.show{display:block}
+#syncBar.syncing{background:rgba(243,156,18,.15);color:#f39c12;border-top:1px solid rgba(243,156,18,.3)}
+#syncBar.ok{background:rgba(39,174,96,.12);color:#27ae60;border-top:1px solid rgba(39,174,96,.2)}
+#syncBar.err{background:rgba(231,76,60,.12);color:#e74c3c;border-top:1px solid rgba(231,76,60,.2)}
+/* device pick */
+.devCard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px}
+.devCard:hover{border-color:var(--cyan)}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div id="logo"><span style="font-size:18px">⚡</span><span id="logoTxt">IRONLOG</span></div>
+  <div id="greet"><div id="greetName"></div><div id="greetSub"></div></div>
+  <nav id="nav"></nav>
+</div>
+<div id="main"></div>
+<div id="syncBar"></div>
+
+<script>
+// ── SUPABASE CONFIG ───────────────────────────────────────────────
+const SB_URL = "https://nbkaaztnuehdqhnxpacf.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ia2FhenRudWVoZHFobnhwYWNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NDQ4MjcsImV4cCI6MjA5NzMyMDgyN30.NdO1RoZ9KFB59Qb0yvopuM-R0d_qKSkp6MNfcmo5RXE";
+
+async function sbFetch(path, options={}){
+  const res = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      "apikey": SB_KEY,
+      "Authorization": `Bearer ${SB_KEY}`,
+      "Content-Type": "application/json",
+      "Prefer": options.prefer || "return=representation",
+      ...(options.headers||{})
+    }
+  });
+  if(!res.ok){ const t=await res.text(); throw new Error(t); }
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : [];
+}
+
+const sbGet    = (table, params="") => sbFetch(`${table}?${params}`);
+const sbInsert = (table, data)      => sbFetch(table, {method:"POST", body:JSON.stringify(data)});
+const sbUpsert = (table, data)      => sbFetch(table, {method:"POST", body:JSON.stringify(data), prefer:"resolution=merge-duplicates,return=representation"});
+const sbDelete = (table, params)    => sbFetch(`${table}?${params}`, {method:"DELETE", prefer:"return=minimal"});
+const sbUpdate = (table, params, data) => sbFetch(`${table}?${params}`, {method:"PATCH", body:JSON.stringify(data), prefer:"return=minimal"});
+
+// ── LOCAL STORAGE (offline cache) ────────────────────────────────
+const K={profile:"il_pro",checkins:"il_chk",styles:"il_sty",exercises:"il_ex",movements:"il_mv",logs:"il_log",dismiss:"il_dis",pid:"il_pid"};
+const ls=(k,fb)=>{try{const v=localStorage.getItem(k);if(v)return JSON.parse(v);}catch{}return fb;};
+const ss=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+
+// ── SEED ─────────────────────────────────────────────────────────
+function SEED_STYLES(pid){return[
+  {id:"s1",profile_id:pid,name:"İtiş (Göğüs-Omuz-Triceps)",color:"#e74c3c",icon:"🔼"},
+  {id:"s2",profile_id:pid,name:"Çekiş (Sırt-Biceps)",color:"#3498db",icon:"🔽"},
+  {id:"s3",profile_id:pid,name:"Bacak",color:"#27ae60",icon:"🦵"},
+  {id:"s4",profile_id:pid,name:"Karın & Kondisyon",color:"#f39c12",icon:"🎯"},
+];}
+function SEED_EX(pid){return[
+  {id:"e1",profile_id:pid,movement_id:"m1",name:"Bench Press",style_id:"s1",sets:4,reps:8,type:"reps",superset:false},
+  {id:"e2",profile_id:pid,movement_id:"m2",name:"İnkline Dumbbell",style_id:"s1",sets:3,reps:12,type:"reps",superset:false},
+  {id:"e3",profile_id:pid,movement_id:"m3",name:"Overhead Press",style_id:"s1",sets:4,reps:8,type:"reps",superset:false},
+  {id:"e4",profile_id:pid,movement_id:"m4",name:"Lateral Raise",style_id:"s1",sets:3,reps:15,type:"reps",superset:true},
+  {id:"e5",profile_id:pid,movement_id:"m5",name:"Dips",style_id:"s1",sets:3,reps:12,type:"reps",superset:false},
+  {id:"e6",profile_id:pid,movement_id:"m6",name:"Tricep Pushdown",style_id:"s1",sets:3,reps:15,type:"reps",superset:false},
+  {id:"e7",profile_id:pid,movement_id:"m7",name:"Deadlift",style_id:"s2",sets:4,reps:5,type:"reps",superset:false},
+  {id:"e8",profile_id:pid,movement_id:"m8",name:"Barbell Row",style_id:"s2",sets:4,reps:8,type:"reps",superset:false},
+  {id:"e9",profile_id:pid,movement_id:"m9",name:"Lat Pulldown",style_id:"s2",sets:3,reps:12,type:"reps",superset:false},
+  {id:"e10",profile_id:pid,movement_id:"m10",name:"Face Pull",style_id:"s2",sets:3,reps:15,type:"reps",superset:false},
+  {id:"e11",profile_id:pid,movement_id:"m11",name:"Bicep Curl",style_id:"s2",sets:3,reps:12,type:"reps",superset:false},
+  {id:"e12",profile_id:pid,movement_id:"m12",name:"Hammer Curl",style_id:"s2",sets:3,reps:12,type:"reps",superset:true},
+  {id:"e13",profile_id:pid,movement_id:"m13",name:"Squat",style_id:"s3",sets:4,reps:8,type:"reps",superset:false},
+  {id:"e14",profile_id:pid,movement_id:"m14",name:"Leg Press",style_id:"s3",sets:3,reps:12,type:"reps",superset:false},
+  {id:"e15",profile_id:pid,movement_id:"m15",name:"Romanian Deadlift",style_id:"s3",sets:3,reps:10,type:"reps",superset:false},
+  {id:"e16",profile_id:pid,movement_id:"m16",name:"Leg Curl",style_id:"s3",sets:3,reps:12,type:"reps",superset:false},
+  {id:"e17",profile_id:pid,movement_id:"m17",name:"Calf Raise",style_id:"s3",sets:4,reps:15,type:"reps",superset:false},
+  {id:"e18",profile_id:pid,movement_id:"m18",name:"Plank",style_id:"s4",sets:3,reps:60,type:"duration",superset:false},
+  {id:"e19",profile_id:pid,movement_id:"m19",name:"Cable Crunch",style_id:"s4",sets:3,reps:15,type:"reps",superset:false},
+  {id:"e20",profile_id:pid,movement_id:"m20",name:"Hanging Leg Raise",style_id:"s4",sets:3,reps:12,type:"reps",superset:false},
+  {id:"e21",profile_id:pid,movement_id:"m21",name:"Russian Twist",style_id:"s4",sets:3,reps:20,type:"reps",superset:false},
+];}
+function SEED_MOVEMENTS(pid){
+  return SEED_EX(pid).map(e=>({id:e.movement_id,profile_id:pid,name:e.name}));
+}
+
+// ── STATE ─────────────────────────────────────────────────────────
+let profileId  = ls(K.pid, null);
+let profile    = ls(K.profile, null);
+let checkins   = ls(K.checkins, []);
+let styles     = ls(K.styles, []);
+let exercises  = ls(K.exercises, []);
+let movements  = ls(K.movements, []);
+let logs       = ls(K.logs, []);
+let dismiss    = ls(K.dismiss, null);
+let activeTab  = "workout";
+let workoutStartedAt=null;
+let workoutStyle=null, workoutExercises=[], workoutWeights={}, workoutDone={}, workoutReps={};
+let workoutStep=0;
+
+function cacheAll(){
+  ss(K.pid,profileId);ss(K.profile,profile);ss(K.checkins,checkins);
+  ss(K.styles,styles);ss(K.exercises,exercises);ss(K.movements,movements);ss(K.logs,logs);ss(K.dismiss,dismiss);
+}
+
+// ── SYNC STATUS BAR ───────────────────────────────────────────────
+function showSync(state, msg){
+  const b=document.getElementById("syncBar");
+  b.className="show "+state; b.textContent=msg;
+  if(state==="ok") setTimeout(()=>{b.className="";},2000);
+}
+
+// ── SUPABASE LOAD ─────────────────────────────────────────────────
+async function loadFromSupabase(pid){
+  showSync("syncing","⟳ Veriler yükleniyor…");
+  try{
+    const [chk, sty, ex, mv, lg] = await Promise.all([
+      sbGet("checkins",`profile_id=eq.${pid}&order=date.desc`),
+      sbGet("styles",`profile_id=eq.${pid}`),
+      sbGet("exercises",`profile_id=eq.${pid}&order=order_index.asc`),
+      sbGet("movements",`profile_id=eq.${pid}`),
+      sbGet("logs",`profile_id=eq.${pid}&order=timestamp.desc`),
+    ]);
+    checkins  = chk;
+    styles    = sty;
+    exercises = ex.map(e=>({...e,styleId:e.style_id}));
+    movements = mv;
+    logs      = lg.map(l=>({...l,styleId:l.style_id,dateISO:l.date_iso}));
+
+    // Otomatik göç: movement_id'si olmayan eski hareketler için kütüphane kaydı oluştur
+    const needsMigration = exercises.filter(e=>!e.movement_id);
+    if(needsMigration.length>0){
+      showSync("syncing","⟳ Hareket kütüphanesi oluşturuluyor…");
+      const newMovements=[];
+      const movementMap={}; // name(lowercase) -> movement_id, aynı isimde tekrar oluşturmamak için
+      for(const ex of needsMigration){
+        const nameKey=ex.name.trim().toLowerCase();
+        let movId=movementMap[nameKey];
+        if(!movId){
+          // Önce zaten yüklenmiş movements içinde var mı bak
+          const existing=movements.find(m=>m.name.trim().toLowerCase()===nameKey);
+          if(existing){
+            movId=existing.id;
+          }else{
+            movId=uid();
+            newMovements.push({id:movId,profile_id:pid,name:ex.name});
+          }
+          movementMap[nameKey]=movId;
+        }
+        ex.movement_id=movId;
+      }
+      if(newMovements.length>0){
+        await sbUpsert("movements", newMovements);
+        movements=[...movements,...newMovements];
+      }
+      // exercises tablosunda movement_id güncelle
+      await Promise.all(needsMigration.map(ex=>
+        sbUpdate("exercises",`id=eq.${ex.id}`,{movement_id:ex.movement_id})
+      ));
+    }
+
+    cacheAll();
+    showSync("ok","✓ Senkronize edildi");
+  }catch(e){
+    console.error(e);
+    showSync("err","⚠ Bağlantı hatası — çevrimdışı çalışılıyor");
+  }
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────
+const uid=()=>Math.random().toString(36).slice(2,9);
+const fmt=s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const todayTR=()=>new Date().toLocaleDateString("tr-TR");
+const shortDate=iso=>{try{return new Date(iso).toLocaleDateString("tr-TR",{day:"2-digit",month:"short"});}catch{return iso;}};
+const daysBetween=(a,b)=>Math.abs((new Date(b)-new Date(a))/864e5);
+const el=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html)e.innerHTML=html;return e;};
+const $=(s)=>document.querySelector(s);
+
+function lastWeights(exId){
+  for(const log of logs){
+    const e=log.entries?.find(e=>e.exerciseId===exId);
+    if(e){
+      const ws=e.sets?.map(s=>s.weight).filter(Boolean);
+      const reps=e.sets?.map(s=>s.reps);
+      if(ws?.length)return{date:log.date,weights:ws,reps:reps||[]};
+    }
+  }return null;
+}
+function exSessions(exId){
+  const out=[];
+  [...logs].sort((a,b)=>(a.timestamp||0)-(b.timestamp||0)).forEach(log=>{
+    const e=log.entries?.find(e=>e.exerciseId===exId);if(!e)return;
+    const ws=(e.sets||[]).map(s=>parseFloat(s.weight)).filter(w=>!isNaN(w)&&w>0);
+    if(!ws.length)return;
+    const reps=(e.sets||[]).map(s=>parseInt(s.reps)).filter(r=>!isNaN(r)&&r>0);
+    const avgReps=reps.length?Math.round(reps.reduce((a,b)=>a+b,0)/reps.length):null;
+    out.push({label:log.date,max:Math.max(...ws),avgReps});
+  });return out;
+}
+function groupBlocks(exs){
+  // Yeni sistem: superset_group ID'si aynı olan hareketler aynı blokta
+  // Eski sistem fallback: superset:true olan hareket bir öncekiyle gruplanır
+  const blocks=[];
+  let i=0;
+  while(i<exs.length){
+    const ex=exs[i];
+    // superset_group varsa: aynı group_id'li ardışık hareketleri topla
+    if(ex.superset_group){
+      const block=[ex];
+      let j=i+1;
+      while(j<exs.length && exs[j].superset_group===ex.superset_group){
+        block.push(exs[j]);j++;
+      }
+      blocks.push(block);i=j;
+    } else {
+      // Eski boolean fallback
+      const block=[ex];
+      let j=i+1;
+      while(j<exs.length && exs[j].superset && !exs[j].superset_group){
+        block.push(exs[j]);j++;
+      }
+      blocks.push(block);i=j;
+    }
+  }
+  return blocks;
+}
+function getStyle(id){return styles.find(s=>s.id===id)||{name:id,color:"#888",icon:"?"};}
+function getEx(id){
+  const ex=exercises.find(e=>e.id===id);
+  if(ex)return ex;
+  // Hareket programdan silinmiş olsa bile log kayıtlarından adını bul
+  for(const log of logs){
+    const entry=log.entries?.find(e=>e.exerciseId===id);
+    if(entry?.exerciseName)return{name:entry.exerciseName,id};
+  }
+  return{name:"(Silinmiş Hareket)",id};
+}
+function getMovement(id){return movements.find(m=>m.id===id)||{name:"?"};}
+
+// ── RENDER ────────────────────────────────────────────────────────
+function render(){
+  const main=$('#main');main.innerHTML="";
+  updateHeader();
+  if(!profile){renderOnboarding(main);return;}
+  const lastCI=checkins[0];
+  const needCI=(!lastCI||daysBetween(lastCI.date,todayISO())>=7)&&dismiss!==todayISO();
+  if(needCI)showCheckinModal();
+  renderTab(main);
+}
+
+function updateHeader(){
+  if(!profile){$('#greetName').textContent="";$('#greetSub').textContent="";$('#nav').innerHTML="";return;}
+  $('#greetName').textContent=`${profile.name} 👋`;
+  const lci=checkins[0];
+  $('#greetSub').textContent=lci?`${lci.weight} kg${lci.body_fat?` · %${lci.body_fat} yağ`:""}` :"";
+  const tabs=[["workout","🏋️","ANTRENMAN"],["progress","📊","İLERLEME"],["body","⚖️","VÜCUT"],["admin","⚙️","AYARLAR"]];
+  $('#nav').innerHTML=tabs.map(([id,icon,label])=>`<button class="navBtn${activeTab===id?" active":""}" onclick="setTab('${id}')">${icon}<span>${label}</span></button>`).join("");
+}
+function setTab(t){activeTab=t;render();}
+function renderTab(main){
+  if(activeTab==="workout")renderWorkout(main);
+  else if(activeTab==="progress")renderProgress(main);
+  else if(activeTab==="body")renderBody(main);
+  else renderAdmin(main);
+}
+
+// ── ONBOARDING ────────────────────────────────────────────────────
+function renderOnboarding(main){
+  $('#hdr').style.display="none";
+  main.style.marginTop="0";
+  main.innerHTML=`
+  <div class="obRoot">
+    <div class="obCard">
+      <div style="font-size:46px;margin-bottom:8px">⚡</div>
+      <div class="bigTitle">IRONLOG</div>
+      <div style="font-size:11px;color:#555;letter-spacing:2px;margin-bottom:20px">KİŞİSEL ANTRENMAN TAKİP</div>
+      <div style="display:flex;flex-direction:column;gap:12px;text-align:left;margin-bottom:16px">
+        <label class="lbl">Ad Soyad *<input id="obName" class="inp" placeholder="Ahmet Yılmaz"/></label>
+        <div class="grid2">
+          <label class="lbl">Boy (cm) *<input id="obHeight" type="number" class="inp" placeholder="175"/></label>
+          <label class="lbl">Kilo (kg) *<input id="obWeight" type="number" class="inp" placeholder="78"/></label>
+        </div>
+        <label class="lbl">Yağ Oranı % (opsiyonel)<input id="obFat" type="number" class="inp" placeholder="18"/></label>
+      </div>
+      <button class="btn" style="width:100%;font-size:15px" onclick="submitOnboarding()">🚀 Başla</button>
+      <p style="font-size:11px;color:#444;margin-top:14px;line-height:1.6">Veriler Supabase'de saklanır — tüm cihazlardan erişebilirsin.</p>
+    </div>
+  </div>`;
+}
+
+async function submitOnboarding(){
+  const name=$('#obName').value.trim(),height=+$('#obHeight').value,weight=+$('#obWeight').value,fat=+$('#obFat').value;
+  if(!name||!height||!weight){alert("Ad, boy ve kilo zorunlu!");return;}
+  showSync("syncing","⟳ Profil oluşturuluyor…");
+  try{
+    // Check if profile exists with same name
+    const existing = await sbGet("profiles",`name=eq.${encodeURIComponent(name)}`);
+    let pid;
+    if(existing.length>0){
+      pid = existing[0].id;
+      profile = existing[0];
+    } else {
+      pid = uid();
+      const [p] = await sbInsert("profiles",[{id:pid,name,height}]);
+      profile = p;
+      // Insert seed data
+      const seedSty = SEED_STYLES(pid);
+      const seedMv  = SEED_MOVEMENTS(pid);
+      const seedEx  = SEED_EX(pid);
+      await sbUpsert("styles", seedSty);
+      await sbUpsert("movements", seedMv);
+      await sbUpsert("exercises", seedEx.map(e=>({...e,style_id:e.style_id})));
+      styles    = seedSty;
+      movements = seedMv;
+      exercises = seedEx;
+    }
+    profileId = pid;
+    const [ci] = await sbInsert("checkins",[{id:uid(),profile_id:pid,date:todayISO(),weight,body_fat:fat||null}]);
+    checkins = [ci];
+    cacheAll();
+    showSync("ok","✓ Profil oluşturuldu");
+    $('#hdr').style.display="";main.style.marginTop="";
+    render();
+  }catch(e){console.error(e);showSync("err","⚠ Hata: "+e.message);}
+}
+
+// ── CHECKIN MODAL ─────────────────────────────────────────────────
+function showCheckinModal(){
+  const m=el("div","modal");
+  m.innerHTML=`<div class="modalCard">
+    <div style="font-size:36px;margin-bottom:8px">⚖️</div>
+    <div style="font-size:18px;font-weight:900;margin-bottom:6px">Haftalık Tartı Zamanı!</div>
+    <div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.5">Bu haftaki kilonu gir.</div>
+    <div class="grid2" style="margin-bottom:14px">
+      <label class="lbl">Kilo (kg) *<input id="ciWeight" type="number" class="inp" placeholder="78"/></label>
+      <label class="lbl">Yağ Oranı %<input id="ciFat" type="number" class="inp" placeholder="18"/></label>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" style="flex:1" onclick="saveCheckin()">💾 Kaydet</button>
+      <button class="btn-ghost" onclick="dismissCheckin()">Daha Sonra</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+}
+async function saveCheckin(){
+  const w=+$('#ciWeight').value,f=+$('#ciFat').value;
+  if(!w){alert("Kilo zorunlu!");return;}
+  showSync("syncing","⟳ Kaydediliyor…");
+  try{
+    const [ci]=await sbInsert("checkins",[{id:uid(),profile_id:profileId,date:todayISO(),weight:w,body_fat:f||null}]);
+    checkins=[ci,...checkins.filter(c=>c.date!==todayISO())];
+    cacheAll();showSync("ok","✓ Kaydedildi");closeModal();render();
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+}
+function dismissCheckin(){dismiss=todayISO();ss(K.dismiss,dismiss);closeModal();}
+function closeModal(){const m=$('.modal');if(m)m.remove();}
+
+// ── WORKOUT ───────────────────────────────────────────────────────
+function renderWorkout(main){
+  if(workoutStep===0)renderWorkoutSelect(main);
+  else if(workoutStep===1)renderWorkoutPreview(main);
+  else renderWorkoutActive(main);
+}
+function renderWorkoutSelect(main){
+  const d=el("div");d.innerHTML=`<div class="pageTitle">Bugün Ne Yapıyorsun?</div>`;
+  const grid=el("div","grid3");
+  if(!styles.length)grid.innerHTML=`<div class="empty">Ayarlar'dan program ekleyin.</div>`;
+  styles.forEach(s=>{
+    const exs=exercises.filter(e=>(e.styleId||e.style_id)===s.id);
+    const cnt=exs.length;
+    const totalSets=exs.reduce((sum,e)=>sum+(e.sets||0),0);
+    const btn=el("button","styleCard");
+    btn.style.borderColor=s.color;
+    btn.innerHTML=`<div class="styleIcon" style="background:${s.color}22;color:${s.color}">${s.icon}</div>
+      <span style="font-size:13px;font-weight:700;color:#e8e8f0;line-height:1.3">${s.name}</span>
+      <span style="font-size:11px;color:#555">${cnt} hareket · ${totalSets} set</span>`;
+    btn.onclick=()=>previewWorkout(s);
+    grid.appendChild(btn);
+  });
+  d.appendChild(grid);main.appendChild(d);
+}
+
+// Önizleme: tıklayınca hareketleri göster, "Başlat" ile antrenmanı başlat
+function previewWorkout(s){
+  workoutStyle=s;
+  workoutExercises=exercises.filter(e=>(e.styleId||e.style_id)===s.id);
+  workoutStep=1;
+  render();
+}
+
+function renderWorkoutPreview(main){
+  const exs=workoutExercises;
+  const totalSets=exs.reduce((sum,e)=>sum+(e.sets||0),0);
+
+  // Başlık + geri butonu
+  const hdr=el("div");
+  hdr.style.cssText="display:flex;align-items:center;gap:12px;margin-bottom:20px";
+  hdr.innerHTML=`<button class="btn-ghost" onclick="cancelWorkout()">← Geri</button>
+    <div>
+      <span class="badge" style="background:${workoutStyle.color}33;color:${workoutStyle.color};font-size:14px">${workoutStyle.icon} ${workoutStyle.name}</span>
+      <span style="font-size:12px;color:#555;margin-left:10px">${exs.length} hareket · ${totalSets} set</span>
+    </div>`;
+  main.appendChild(hdr);
+
+  // Hareket listesi (önizleme)
+  const blocks=groupBlocks(exs);
+  blocks.forEach((block,bi)=>{
+    if(block.length===1){
+      main.appendChild(buildPreviewCard(block[0],null));
+    }else{
+      const wrap=el("div","ssBlock");
+      wrap.innerHTML=`<div class="ssLabel">🔗 SÜPERSET</div>`;
+      block.forEach((ex,idx)=>{
+        if(idx>0){const p=el("div");p.style.cssText="text-align:center;color:#a78bfa;font-size:16px;font-weight:900;padding:2px 0";p.textContent="+";wrap.appendChild(p);}
+        wrap.appendChild(buildPreviewCard(ex,`${bi+1}${String.fromCharCode(65+idx)}`));
+      });
+      main.appendChild(wrap);
+    }
+  });
+
+  if(!exs.length){
+    const e=el("div","empty");e.innerHTML=`Bu programa henüz hareket eklenmemiş.<br>Ayarlar → Program Hareketleri'nden ekleyin.`;
+    main.appendChild(e);
+  }
+
+  // Başlat butonu
+  const footer=el("div");
+  footer.style.cssText="position:sticky;bottom:0;padding:16px 0 8px;background:linear-gradient(transparent,#0a0a14 40%);margin-top:16px";
+  footer.innerHTML=`<button class="btn" style="width:100%;font-size:16px;padding:14px" onclick="startWorkout()">▶ Antrenmanı Başlat</button>`;
+  main.appendChild(footer);
+}
+
+function buildPreviewCard(ex,label){
+  const isDur=ex.type==="duration";
+  const valDisplay=isDur?`${Math.floor(ex.reps/60)}:${String(ex.reps%60).padStart(2,"0")} dk:sn`:`${ex.reps} tekrar`;
+  const hasTarget=ex.target_weight!=null && ex.target_weight!=="";
+  const last=lastWeights(ex.id);
+  const card=el("div");
+  card.style.cssText="background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.07);padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px";
+  card.innerHTML=`
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:800;color:#e8e8f0">
+        ${label?`<span class="lblBadge">${label}</span>`:""}${ex.name}
+      </div>
+      <div style="font-size:12px;color:#666;margin-top:3px">${ex.sets} set × ${valDisplay}</div>
+      ${hasTarget?`<div style="margin-top:4px"><span class="targetChip">🎯 Hedef: ${ex.target_weight} kg</span></div>`:
+        last?`<div style="margin-top:4px;font-size:11px;color:#555">Son: ${last.weights[0]} kg</div>`:""}
+    </div>
+    <div style="font-size:22px;color:rgba(255,255,255,.08);font-weight:900">${ex.sets}×</div>`;
+  return card;
+}
+
+function startWorkout(){
+  workoutWeights={};workoutDone={};workoutReps={};workoutStartedAt=Date.now();workoutStep=2;
+  render();
+}
+
+function renderWorkoutActive(main){
+  const allKeys=workoutExercises.flatMap(ex=>Array.from({length:ex.sets},(_,i)=>`${ex.id}_${i}`));
+  const doneC=allKeys.filter(k=>workoutDone[k]).length;
+  const prog=allKeys.length?doneC/allKeys.length:0;
+  const C=2*Math.PI*20;
+  const startTimeStr=new Date(workoutStartedAt).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+  const tb=el("div");tb.id="timerBar";
+  tb.innerHTML=`<div>
+    <div style="font-size:13px;color:#666;margin-bottom:4px">⏱ Başlangıç: <strong style="color:#e8e8f0">${startTimeStr}</strong></div>
+    <span class="badge" style="background:${workoutStyle.color}33;color:${workoutStyle.color}">${workoutStyle.icon} ${workoutStyle.name}</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div style="position:relative;width:52px;height:52px;flex-shrink:0">
+      <svg width="52" height="52">
+        <circle cx="26" cy="26" r="20" fill="none" stroke="#1a1a2e" stroke-width="4"/>
+        <circle id="progCircle" cx="26" cy="26" r="20" fill="none" stroke="#00d4ff" stroke-width="4"
+          stroke-dasharray="${C}" stroke-dashoffset="${C*(1-prog)}"
+          style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset .4s"/>
+      </svg>
+      <span id="progPct" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#00d4ff">${Math.round(prog*100)}%</span>
+    </div>
+    <button class="btn" onclick="finishWorkout()">✓ BİTİR</button>
+  </div>`;
+  main.appendChild(tb);
+  if(!workoutExercises.length){main.innerHTML+=`<div class="empty">Bu programa hareket eklenmemiş.<br><br><button class="btn-ghost" onclick="cancelWorkout()">← Geri</button></div>`;return;}
+  groupBlocks(workoutExercises).forEach((block,bi)=>{
+    if(block.length===1){main.appendChild(buildExCard(block[0],null));return;}
+    const wrap=el("div","ssBlock");
+    wrap.innerHTML=`<div class="ssLabel">🔗 SÜPERSET — Dinlenmeden ardı ardına yap</div>`;
+    block.forEach((ex,idx)=>{
+      if(idx>0){const p=el("div");p.style.cssText="text-align:center;color:#a78bfa;font-size:18px;font-weight:900;padding:2px 0";p.textContent="+";wrap.appendChild(p);}
+      wrap.appendChild(buildExCard(ex,`${bi+1}${String.fromCharCode(65+idx)}`));
+    });
+    main.appendChild(wrap);
+  });
+}
+
+function buildExCard(ex,label){
+  const last=lastWeights(ex.id);
+  const isDur=ex.type==="duration";
+  const hasTarget=ex.target_weight!=null && ex.target_weight!=="";
+  const card=el("div","exCard");
+  let lastHtml="";
+  if(last)lastHtml=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"><span style="font-size:11px;color:#555">Son (${last.date}):</span>${last.weights.map(w=>`<span class="wChip">${w} kg</span>`).join("")}</div>`;
+  if(hasTarget)lastHtml+=`<div style="margin-top:4px"><span class="targetChip">🎯 Hedef: ${ex.target_weight} kg</span></div>`;
+  const headerRight=isDur?`${ex.sets}×${Math.floor(ex.reps/60)}:${String(ex.reps%60).padStart(2,"0")}`:`${ex.sets}×${ex.reps}`;
+  card.innerHTML=`<div class="exHdr">
+    <div><div class="exName">${label?`<span class="lblBadge">${label}</span>`:""}${ex.name}</div>${lastHtml}</div>
+    <span style="font-size:11px;color:#555;flex-shrink:0">${headerRight}</span>
+  </div><div id="sets_${ex.id}"></div>`;
+  const setsDiv=card.querySelector(`#sets_${ex.id}`);
+  for(let i=0;i<ex.sets;i++){
+    const k=`${ex.id}_${i}`,isDone=!!workoutDone[k];
+    const prevW=last?.weights[i]??last?.weights[0]??"";
+    // Hedef ağırlık varsa, kg kutusunda varsayılan olarak onu göster ve farklı renkte rozet kullan
+    const weightDefault = hasTarget ? ex.target_weight : (workoutWeights[k]||"");
+    const isTargetSet = hasTarget && !workoutWeights[k];
+    // Son antrenmanda bu set için girilen tekrar/süre tanımlanan hedeften yüksekse, onu varsayılan göster (progressive overload)
+    const lastRepVal=last?.reps?.[i];
+    const baseTarget=(lastRepVal!=null && +lastRepVal>ex.reps) ? +lastRepVal : ex.reps;
+    const row=el("div","setRow");
+    if(isDone)row.style.opacity="0.45";
+    let middleHtml;
+    if(isDur){
+      const durVal=workoutReps[k]!=null?workoutReps[k]:baseTarget;
+      const dm=Math.floor(durVal/60), ds=durVal%60;
+      middleHtml=`<div style="display:flex;align-items:center;gap:3px;flex-shrink:0">
+        <input type="number" class="wInp durMin" style="width:38px" value="${dm}" min="0" data-exid="${ex.id}" data-set="${i}"/>
+        <span style="font-size:10px;color:#555">dk</span>
+        <input type="number" class="wInp durSec" style="width:38px" value="${ds}" min="0" max="59" data-exid="${ex.id}" data-set="${i}"/>
+        <span style="font-size:10px;color:#555">sn</span>
+      </div>`;
+    }else{
+      const repsVal=workoutReps[k]??baseTarget;
+      middleHtml=`<div style="display:flex;align-items:center;gap:3px;flex-shrink:0">
+        <input type="number" class="wInp repInp" style="width:44px" value="${repsVal}" data-exid="${ex.id}" data-set="${i}" data-kind="reps"/>
+        <span style="font-size:10px;color:#555">tekrar</span>${baseTarget>ex.reps?`<span style="font-size:9px;color:#27ae60">▲</span>`:""}
+      </div>`;
+    }
+    row.innerHTML=`<span style="font-size:12px;color:#555;width:42px;flex-shrink:0">Set ${i+1}</span>
+      ${prevW?`<span class="prevBadge">Önceki: ${prevW} kg</span>`:""}
+      ${middleHtml}
+      <div style="display:flex;align-items:center;gap:4px;flex:1;justify-content:flex-end">
+        <input type="number" class="wInp${isTargetSet?" targetInput":""}" placeholder="${prevW||'kg'}" value="${weightDefault}" data-exid="${ex.id}" data-set="${i}" data-kind="weight"/>
+        <span style="font-size:11px;color:#555">kg</span>
+      </div>
+      <button class="doneBtn${isDone?" on":""}" data-key="${k}">${isDone?"✓":"○"}</button>`;
+    setsDiv.appendChild(row);
+    if(isTargetSet && !workoutWeights[k]) workoutWeights[k]=String(ex.target_weight);
+  }
+  // ── Bir sonraki idman için hedef ağırlık belirleme ──
+  const targetBox=el("div");
+  targetBox.style.cssText="padding:8px 14px 12px;border-top:1px solid rgba(255,255,255,.04);margin-top:4px";
+  targetBox.innerHTML=`<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#aaa;cursor:pointer">
+    <input type="checkbox" class="targetToggle" data-exid="${ex.id}" ${hasTarget?"checked":""} style="width:16px;height:16px;accent-color:#e74c3c;flex-shrink:0"/>
+    📈 Bir sonraki idmanda ağırlık artırmak ister misin?
+  </label>
+  <div class="targetInputWrap" data-exid="${ex.id}" style="display:${hasTarget?"flex":"none"};align-items:center;gap:8px;margin-top:8px;padding-left:24px">
+    <span style="font-size:11px;color:#666">Hedef ağırlık:</span>
+    <input type="number" class="inp targetWeightInput" data-exid="${ex.id}" value="${ex.target_weight||''}" placeholder="örn. 115" style="width:90px"/>
+    <span style="font-size:11px;color:#666">kg</span>
+    <button class="btn-ghost saveTargetBtn" data-exid="${ex.id}" style="padding:5px 10px;font-size:11px">💾 Kaydet</button>
+  </div>`;
+  card.appendChild(targetBox);
+
+  card.querySelectorAll('.wInp[data-kind="weight"]').forEach(inp=>{
+    inp.addEventListener('input',function(){
+      const exId=this.dataset.exid,si=+this.dataset.set,v=this.value;
+      this.classList.remove('targetInput');
+      if(si===0){
+        const ex2=exercises.find(e=>e.id===exId);
+        if(ex2)for(let j=0;j<ex2.sets;j++)workoutWeights[`${exId}_${j}`]=v;
+        card.querySelectorAll('.wInp[data-kind="weight"]').forEach((x,i)=>{if(i>0){x.value=v;x.classList.remove('targetInput');}});
+      }
+      else workoutWeights[`${exId}_${si}`]=v;
+    });
+  });
+  card.querySelectorAll('.repInp').forEach(inp=>{
+    inp.addEventListener('input',function(){
+      const exId=this.dataset.exid,si=+this.dataset.set;
+      workoutReps[`${exId}_${si}`]=this.value;
+    });
+  });
+  card.querySelectorAll('.durMin,.durSec').forEach(inp=>{
+    inp.addEventListener('input',function(){
+      const exId=this.dataset.exid,si=+this.dataset.set;
+      const row=this.closest('.setRow');
+      const min=+row.querySelector('.durMin').value||0;
+      const sec=+row.querySelector('.durSec').value||0;
+      workoutReps[`${exId}_${si}`]=min*60+sec;
+    });
+  });
+  card.querySelectorAll('.doneBtn').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      const k=this.dataset.key;workoutDone[k]=!workoutDone[k];
+      this.textContent=workoutDone[k]?"✓":"○";this.classList.toggle("on",workoutDone[k]);
+      this.closest('.setRow').style.opacity=workoutDone[k]?"0.45":"1";updateProgress();
+    });
+  });
+  card.querySelector('.targetToggle')?.addEventListener('change',function(){
+    const wrap=card.querySelector(`.targetInputWrap[data-exid="${this.dataset.exid}"]`);
+    if(wrap)wrap.style.display=this.checked?"flex":"none";
+    if(!this.checked) saveTargetWeight(this.dataset.exid, null);
+  });
+  card.querySelector('.saveTargetBtn')?.addEventListener('click',function(){
+    const exId=this.dataset.exid;
+    const input=card.querySelector(`.targetWeightInput[data-exid="${exId}"]`);
+    const val=input?.value;
+    if(!val){alert("Hedef ağırlık gir!");return;}
+    saveTargetWeight(exId, +val);
+  });
+  return card;
+}
+
+async function saveTargetWeight(exId, val){
+  showSync("syncing","⟳ Kaydediliyor…");
+  try{
+    await sbUpdate("exercises",`id=eq.${exId}`,{target_weight:val});
+    exercises=exercises.map(e=>e.id===exId?{...e,target_weight:val}:e);
+    workoutExercises=workoutExercises.map(e=>e.id===exId?{...e,target_weight:val}:e);
+    cacheAll();
+    showSync("ok", val?"✓ Hedef kaydedildi":"✓ Hedef kaldırıldı");
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+}
+
+function updateProgress(){
+  const allKeys=workoutExercises.flatMap(ex=>Array.from({length:ex.sets},(_,i)=>`${ex.id}_${i}`));
+  const prog=allKeys.length?allKeys.filter(k=>workoutDone[k]).length/allKeys.length:0;
+  const C=2*Math.PI*20;
+  const c=$('#progCircle');const t=$('#progPct');
+  if(c)c.setAttribute('stroke-dashoffset',C*(1-prog));
+  if(t)t.textContent=Math.round(prog*100)+"%";
+}
+async function finishWorkout(){
+  const finishedAt=Date.now();
+  const durationSecs=Math.round((finishedAt-workoutStartedAt)/1000);
+  const logId=uid();
+  const entry={
+    id:logId,date:todayTR(),date_iso:todayISO(),dateISO:todayISO(),timestamp:Date.now(),
+    style_id:workoutStyle.id,styleId:workoutStyle.id,profile_id:profileId,duration:durationSecs,
+    started_at:workoutStartedAt,finished_at:finishedAt,
+    entries:workoutExercises.map(ex=>({exerciseId:ex.id,exerciseName:ex.name,sets:Array.from({length:ex.sets},(_,i)=>({setNum:i+1,reps:workoutReps[`${ex.id}_${i}`]??ex.reps,weight:workoutWeights[`${ex.id}_${i}`]||"",done:!!workoutDone[`${ex.id}_${i}`]}))}))
+  };
+  logs=[entry,...logs];cacheAll();
+  showSync("syncing","⟳ Antrenman kaydediliyor…");
+  try{
+    await sbInsert("logs",[{id:logId,profile_id:profileId,date:entry.date,date_iso:entry.date_iso,timestamp:entry.timestamp,style_id:entry.style_id,duration:entry.duration,entries:entry.entries}]);
+    showSync("ok","✓ Antrenman kaydedildi");
+  }catch(e){showSync("err","⚠ Çevrimdışı kaydedildi");console.error(e);}
+  cancelWorkout();
+}
+function cancelWorkout(){workoutStep=0;workoutStyle=null;workoutExercises=[];workoutWeights={};workoutDone={};workoutReps={};workoutStartedAt=null;render();}
+
+// ── PROGRESS ──────────────────────────────────────────────────────
+let progressView="history";
+function renderProgress(main){
+  const tabs=el("div","subTabs");
+  tabs.innerHTML=`<button class="subTab${progressView==="history"?" active":""}" onclick="setProgView('history')">📋 Geçmiş</button>
+    <button class="subTab${progressView==="chart"?" active":""}" onclick="setProgView('chart')">📈 İlerleme</button>`;
+  main.appendChild(tabs);
+  if(progressView==="history")renderHistory(main);else renderCharts(main);
+}
+function setProgView(v){progressView=v;render();}
+
+function renderHistory(main){
+  if(!logs.length){main.innerHTML+=`<div class="empty">Henüz antrenman kaydı yok.</div>`;return;}
+  logs.forEach(log=>{
+    const st=getStyle(log.styleId||log.style_id);
+    const card=el("div","logCard");card.style.borderLeftColor=st.color;
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px" onclick="toggleLogDetail('${log.id}')">
+      <div><div style="font-size:15px;font-weight:700">${log.date}</div><div style="font-size:12px;color:${st.color};margin-top:3px">${st.icon} ${st.name}</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:14px;font-weight:700;color:#a78bfa">⏱ ${fmt(log.duration)}</span>
+        <button style="background:transparent;border:none;color:#555;cursor:pointer;font-size:13px" onclick="event.stopPropagation();deleteLog('${log.id}')">✕</button>
+      </div>
+    </div>
+    <div id="detail_${log.id}" style="display:none;border-top:1px solid rgba(255,255,255,.06);padding:10px 14px"></div>`;
+    main.appendChild(card);
+  });
+}
+function toggleLogDetail(id){
+  const d=$(`#detail_${id}`);if(!d)return;
+  if(d.style.display==="none"){
+    const log=logs.find(l=>l.id===id);if(!log)return;
+    d.style.display="block";
+    d.innerHTML=log.entries?.map(entry=>{
+      const ex=getEx(entry.exerciseId);const dc=entry.sets?.filter(s=>s.done).length||0;
+      const isDur=ex.type==="duration";
+      return `<div style="margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:#a78bfa;margin-bottom:5px;display:flex;gap:8px">${ex.name}<span style="font-size:11px;color:#555;font-weight:400">${dc}/${entry.sets?.length} set</span></div>
+        ${entry.sets?.map(s=>{
+          const repsDisplay=isDur?`${Math.floor(s.reps/60)}:${String(s.reps%60).padStart(2,"0")}`:`${s.reps} tekrar`;
+          return `<div style="display:flex;gap:10px;font-size:12px;color:#aaa;padding:4px 8px;border-radius:5px;background:rgba(255,255,255,.03);margin-bottom:3px;opacity:${s.done?1:.4}">
+          <span style="width:50px">Set ${s.setNum}</span><span style="width:70px">${repsDisplay}</span>
+          <span style="color:#00d4ff;font-weight:700;width:60px">${s.weight?s.weight+" kg":"—"}</span><span>${s.done?"✓":"✗"}</span>
+        </div>`;}).join("")}
+      </div>`;
+    }).join("")||"";
+  }else d.style.display="none";
+}
+async function deleteLog(id){
+  logs=logs.filter(l=>l.id!==id);cacheAll();
+  try{await sbDelete("logs",`id=eq.${id}`);}catch(e){console.error(e);}
+  render();
+}
+
+function renderCharts(main){
+  const items=exercises.map(ex=>({ex,sess:exSessions(ex.id)})).filter(x=>x.sess.length>0);
+  if(!items.length){main.innerHTML+=`<div class="empty">Henüz ağırlık girilmiş antrenman yok.</div>`;return;}
+  items.forEach(({ex,sess})=>{
+    const st=getStyle(ex.styleId||ex.style_id);
+    const first=sess[0],last=sess[sess.length-1],diff=+(last.max-first.max).toFixed(1);
+    let tIcon="➖",tLabel="Sabit",tColor="#888";
+    if(sess.length>=2){const d=+(last.max-sess[sess.length-2].max).toFixed(1);if(d>0){tIcon="▲";tLabel=`+${d} kg`;tColor="#27ae60";}else if(d<0){tIcon="▼";tLabel=`${d} kg`;tColor="#e74c3c";}else{tIcon="➖";tLabel="Sabit";tColor="#f39c12";}}
+    const card=el("div","progCard");
+    const data=sess.map(s=>s.max),max=Math.max(...data),min=Math.min(...data),range=max-min||1;
+    const W=300,H=60,pts=data.map((v,i)=>({x:(i/(data.length-1||1))*W,y:H-((v-min)/range)*(H-12)-6}));
+    const poly=data.length>1?`<polyline points="${pts.map(p=>`${p.x},${p.y}`).join(" ")}" fill="none" stroke="#00d4ff" stroke-width="2"/>${pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3" fill="#00d4ff"/>`).join("")}`:`<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#00d4ff" font-size="12">${data[0]} kg</text>`;
+    // Tekrar/süre hedefinin altında mı kontrolü
+    const isDur=ex.type==="duration";
+    const lastVal=last.avgReps;
+    const targetVal=ex.reps;
+    let repsHtml="";
+    if(lastVal!=null){
+      const under=lastVal<targetVal;
+      const fmtVal=v=>isDur?`${Math.floor(v/60)}:${String(v%60).padStart(2,"0")}`:v;
+      repsHtml=`<span style="font-size:11px;padding:2px 8px;border-radius:12px;background:${under?"rgba(231,76,60,.12)":"rgba(39,174,96,.12)"};color:${under?"#e74c3c":"#27ae60"}">
+        ${under?"⚠":"✓"} Ort. ${fmtVal(lastVal)}${isDur?"":" tekrar"} ${under?`(hedef ${fmtVal(targetVal)})`:""}
+      </span>`;
+    }
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px;flex-wrap:wrap">
+      <div><div style="font-size:15px;font-weight:800;margin-bottom:4px">${ex.name}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:${st.color}18;color:${st.color}">${st.icon} ${st.name}</span>
+        ${repsHtml}
+      </div></div>
+      <div style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px;border:1px solid ${tColor}55;background:${tColor}15;color:${tColor}">${tIcon} ${tLabel}</div>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px">${poly}</svg>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#666;margin-top:8px">
+      <span>İlk: <strong style="color:#aaa">${first.max} kg</strong></span>
+      <span>Son: <strong style="color:#00d4ff">${last.max} kg</strong></span>
+      ${sess.length>=2?`<span style="color:${diff>0?"#27ae60":diff<0?"#e74c3c":"#888"}">${diff>0?"+":""}${diff} kg toplam</span>`:""}
+      <span style="color:#444">${sess.length} antrenman</span>
+    </div>`;
+    main.appendChild(card);
+  });
+}
+
+// ── BODY ──────────────────────────────────────────────────────────
+let bodyShowForm=false;
+function renderBody(main){
+  const sorted=[...checkins].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const lat=sorted[0];
+  const bmi=lat?(lat.weight/Math.pow(profile.height/100,2)).toFixed(1):null;
+  const bmiLbl=bmi?(bmi<18.5?"Düşük":bmi<25?"Normal":bmi<30?"Fazla Kilolu":"Obez"):"";
+  const bmiClr=bmi?(bmi<18.5?"#f39c12":bmi<25?"#27ae60":bmi<30?"#f39c12":"#e74c3c"):"#888";
+  main.innerHTML=`<div class="pageTitle">Vücut Takibi</div>`;
+  const sg=el("div","statGrid");
+  [{v:lat?.weight??"—",l:"Kilo (kg)",c:"#00d4ff"},{v:lat?.body_fat??"—",l:"Yağ Oranı (%)",c:"#f39c12"},{v:bmi??"—",l:bmiLbl||"BMI",c:bmiClr},{v:profile.height,l:"Boy (cm)",c:"#aaa"}].forEach(({v,l,c})=>{
+    sg.innerHTML+=`<div class="statCard"><div style="font-size:24px;font-weight:900;color:${c}">${v}</div><div style="font-size:11px;color:#666;margin-top:4px">${l}</div></div>`;
+  });
+  main.appendChild(sg);
+  const wSer=[...sorted].reverse().map(c=>c.weight);
+  if(wSer.length>1){const pc=el("div","progCard");pc.style.marginBottom="12px";pc.innerHTML=`<div style="font-size:14px;font-weight:800;margin-bottom:8px">Kilo Grafiği</div>${miniChart(wSer,"#00d4ff")}`;main.appendChild(pc);}
+  const fSer=[...sorted].reverse().filter(c=>c.body_fat!=null).map(c=>c.body_fat);
+  if(fSer.length>1){const pc=el("div","progCard");pc.style.marginBottom="12px";pc.innerHTML=`<div style="font-size:14px;font-weight:800;margin-bottom:8px">Yağ Oranı Grafiği</div>${miniChart(fSer,"#f39c12")}`;main.appendChild(pc);}
+  const hdr=el("div");hdr.style.cssText="display:flex;justify-content:space-between;align-items:center;margin:16px 0 10px";
+  hdr.innerHTML=`<div style="font-size:15px;font-weight:800;color:#aaa">Ölçüm Geçmişi</div><button class="btn" onclick="toggleBodyForm()">${bodyShowForm?"İptal":"+ Ölçüm Ekle"}</button>`;
+  main.appendChild(hdr);
+  if(bodyShowForm){
+    const fc=el("div","card");
+    fc.innerHTML=`<div class="gridForm" style="margin-bottom:12px">
+      <label class="lbl">Tarih<input id="ciDate" type="date" class="inp" value="${todayISO()}"/></label>
+      <label class="lbl">Kilo (kg) *<input id="ciW" type="number" class="inp" placeholder="78"/></label>
+      <label class="lbl">Yağ Oranı %<input id="ciF" type="number" class="inp" placeholder="18"/></label>
+    </div><button class="btn" onclick="addBodyCheckin()">💾 Kaydet</button>`;
+    main.appendChild(fc);
+  }
+  if(!sorted.length){main.innerHTML+=`<div class="empty">Henüz ölçüm yok.</div>`;return;}
+  const tw=el("div","tblWrap");
+  let rows="";
+  sorted.forEach((c,i)=>{
+    const prev=sorted[i+1],diff=prev?+(c.weight-prev.weight).toFixed(1):null;
+    const chg=diff==null?"—":`<span style="color:${diff>0?"#e74c3c":diff<0?"#27ae60":"#888"};font-weight:700">${diff>0?"▲":diff<0?"▼":"➖"} ${Math.abs(diff)} kg</span>`;
+    rows+=`<tr><td style="font-weight:700;color:#e8e8f0">${shortDate(c.date)}</td><td>${c.weight} kg</td><td>${c.body_fat??"—"}</td><td>${chg}</td><td style="text-align:right"><button class="btn-red" onclick="delCheckin('${c.id}')">🗑️</button></td></tr>`;
+  });
+  tw.innerHTML=`<table class="tbl"><thead><tr><th>Tarih</th><th>Kilo</th><th>Yağ %</th><th>Değişim</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  main.appendChild(tw);
+}
+function miniChart(data,color){
+  const W=300,H=60,max=Math.max(...data),min=Math.min(...data),range=max-min||1;
+  const pts=data.map((v,i)=>({x:(i/(data.length-1||1))*W,y:H-((v-min)/range)*(H-12)-6}));
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px">
+    <polyline points="${pts.map(p=>`${p.x},${p.y}`).join(" ")}" fill="none" stroke="${color}" stroke-width="2"/>
+    ${pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3" fill="${color}"/>`).join("")}
+  </svg>`;
+}
+function toggleBodyForm(){bodyShowForm=!bodyShowForm;render();}
+async function addBodyCheckin(){
+  const d=$('#ciDate')?.value||todayISO(),w=+$('#ciW')?.value,f=+$('#ciF')?.value;
+  if(!w){alert("Kilo zorunlu!");return;}
+  showSync("syncing","⟳ Kaydediliyor…");
+  try{
+    const [ci]=await sbInsert("checkins",[{id:uid(),profile_id:profileId,date:d,weight:w,body_fat:f||null}]);
+    checkins=[...checkins.filter(c=>c.date!==d),ci].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    cacheAll();showSync("ok","✓ Kaydedildi");bodyShowForm=false;render();
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+}
+async function delCheckin(id){
+  checkins=checkins.filter(c=>c.id!==id);cacheAll();
+  try{await sbDelete("checkins",`id=eq.${id}`);}catch(e){console.error(e);}
+  render();
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────
+let adminSec="exercises";
+let exEditId=null,exForm={name:"",styleId:"",movementId:"",sets:3,reps:10,type:"reps",superset:false};
+let exFilter="",exSearch="";
+let stEditId=null,stForm={name:"",icon:"🏋️",color:"#e74c3c"};
+
+function renderAdmin(main){
+  main.innerHTML=`<div style="font-size:18px;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,#00d4ff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:14px">⚙️ AYARLAR</div>`;
+  const tabs=el("div","subTabs");
+  tabs.innerHTML=[["profile","🙋 Profil"],["library","📚 Hareket Kütüphanesi"],["exercises","💪 Program Hareketleri"],["styles","🎯 Programlar"],["data","🔄 Senkronizasyon"]].map(([id,label])=>`<button class="subTab${adminSec===id?" active":""}" onclick="setAdminSec('${id}')">${label}</button>`).join("");
+  main.appendChild(tabs);
+  if(adminSec==="profile")renderAdminProfile(main);
+  else if(adminSec==="library")renderAdminLibrary(main);
+  else if(adminSec==="exercises")renderAdminExercises(main);
+  else if(adminSec==="styles")renderAdminStyles(main);
+  else renderAdminData(main);
+}
+function setAdminSec(s){adminSec=s;render();}
+
+function renderAdminProfile(main){
+  const c=el("div","card");
+  c.innerHTML=`<div class="cardTitle">Profil Bilgileri</div>
+  <div class="gridForm" style="margin-bottom:12px">
+    <label class="lbl">Ad Soyad<input id="prName" class="inp" value="${profile.name}"/></label>
+    <label class="lbl">Boy (cm)<input id="prHeight" type="number" class="inp" value="${profile.height}" style="width:90px"/></label>
+  </div>
+  <button class="btn" onclick="saveProfile()">💾 Kaydet</button>`;
+  main.appendChild(c);
+}
+async function saveProfile(){
+  const n=$('#prName')?.value.trim(),h=+$('#prHeight')?.value;
+  if(!n||!h)return;
+  showSync("syncing","⟳ Güncelleniyor…");
+  try{
+    await sbUpdate("profiles",`id=eq.${profileId}`,{name:n,height:h});
+    profile={...profile,name:n,height:h};cacheAll();showSync("ok","✓ Güncellendi");render();
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+}
+
+// ── HAREKET KÜTÜPHANESİ ─────────────────────────────────────────────
+let mvEditId=null, mvForm={name:""}, mvSearch="";
+function renderAdminLibrary(main){
+  const fc=el("div","card");
+  fc.innerHTML=`<div class="cardTitle">${mvEditId?"✏️ Hareketi Düzenle":"➕ Kütüphaneye Yeni Hareket Ekle"}</div>
+  <p style="font-size:12px;color:#555;margin-bottom:12px">Burada sadece hareket isimleri tutulur (örn. "Bench Press"). Set/tekrar/süre ayarlarını "Program Hareketleri" sekmesinden, hareketi bir programa eklerken yaparsın.</p>
+  <div style="display:flex;gap:8px">
+    <input id="mvName" class="inp" style="flex:1" value="${mvForm.name}" placeholder="örn. Bench Press"/>
+    <button class="btn" onclick="submitMovement()">${mvEditId?"💾 Güncelle":"➕ Ekle"}</button>
+    ${mvEditId?`<button class="btn-ghost" onclick="cancelMvEdit()">İptal</button>`:""}
+  </div>`;
+  main.appendChild(fc);
+
+  const fr=el("div");fr.style.marginBottom="12px";
+  fr.innerHTML=`<input class="inp" placeholder="🔍 Kütüphanede ara..." value="${mvSearch}" oninput="mvSearch=this.value;render()"/>`;
+  main.appendChild(fr);
+
+  const filtered=movements.filter(m=>mvSearch?m.name.toLowerCase().includes(mvSearch.toLowerCase()):true);
+  const tw=el("div","tblWrap");let rows="";
+  filtered.forEach(m=>{
+    const usageCount=exercises.filter(e=>e.movement_id===m.id).length;
+    rows+=`<tr><td><strong style="color:#e8e8f0">${m.name}</strong></td>
+      <td><span style="font-size:11px;color:#666">${usageCount>0?`${usageCount} programda kullanılıyor`:"henüz hiçbir programda yok"}</span></td>
+      <td style="text-align:right"><button class="btn-edit" onclick="startMvEdit('${m.id}')">✏️</button><button class="btn-red" onclick="delMovement('${m.id}')">🗑️</button></td></tr>`;
+  });
+  tw.innerHTML=`<table class="tbl"><thead><tr><th>Hareket</th><th>Kullanım</th><th style="text-align:right">İşlem</th></tr></thead><tbody>${rows||`<tr><td colspan="3" style="text-align:center;color:#444;padding:28px 0">Kütüphane boş</td></tr>`}</tbody></table>
+  <div style="padding:8px 14px;font-size:11px;color:#444;border-top:1px solid rgba(255,255,255,.05)">${filtered.length} hareket</div>`;
+  main.appendChild(tw);
+}
+async function submitMovement(){
+  const name=$('#mvName')?.value.trim();
+  if(!name){alert("Hareket adı zorunlu!");return;}
+  showSync("syncing","⟳ Kaydediliyor…");
+  try{
+    if(mvEditId){
+      await sbUpdate("movements",`id=eq.${mvEditId}`,{name});
+      movements=movements.map(m=>m.id===mvEditId?{...m,name}:m);
+      // Bu harekete bağlı tüm program kayıtlarındaki ismi de güncelle (gösterim tutarlılığı için)
+      exercises=exercises.map(e=>e.movement_id===mvEditId?{...e,name}:e);
+      mvEditId=null;
+    }else{
+      const id=uid();
+      await sbInsert("movements",[{id,profile_id:profileId,name}]);
+      movements=[...movements,{id,profile_id:profileId,name}];
+    }
+    mvForm={name:""};cacheAll();showSync("ok","✓ Kaydedildi");render();
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+}
+function startMvEdit(id){const m=movements.find(x=>x.id===id);if(!m)return;mvEditId=id;mvForm={name:m.name};render();}
+function cancelMvEdit(){mvEditId=null;mvForm={name:""};render();}
+async function delMovement(id){
+  const usageCount=exercises.filter(e=>e.movement_id===id).length;
+  if(usageCount>0&&!confirm(`Bu hareket ${usageCount} programda kullanılıyor. Silersen oralardan da kalkacak. Emin misin?`))return;
+  movements=movements.filter(m=>m.id!==id);
+  exercises=exercises.filter(e=>e.movement_id!==id);
+  cacheAll();
+  try{
+    await sbDelete("exercises",`movement_id=eq.${id}`);
+    await sbDelete("movements",`id=eq.${id}`);
+  }catch(e){console.error(e);}
+  render();
+}
+
+// ── PROGRAM HAREKETLERİ (kütüphaneden seçilip programa atanır) ─────
+function renderAdminExercises(main){
+  const stEx=exForm.styleId?exercises.filter(e=>(e.styleId||e.style_id)===exForm.styleId):[];
+  let prevEx=null;
+  if(exForm.styleId){if(exEditId){const idx=stEx.findIndex(e=>e.id===exEditId);if(idx>0)prevEx=stEx[idx-1];}else if(stEx.length>0)prevEx=stEx[stEx.length-1];}
+  const canSS=!!prevEx;
+  const isDuration=exForm.type==="duration";
+
+  if(!movements.length){
+    main.innerHTML+=`<div class="empty">Önce "Hareket Kütüphanesi" sekmesinden hareket ekle, sonra buradan programa atayabilirsin.</div>`;
+    return;
+  }
+
+  const fc=el("div","card");
+  fc.innerHTML=`<div class="cardTitle">${exEditId?"✏️ Program Hareketini Düzenle":"➕ Programa Hareket Ekle"}</div>
+  <div class="gridForm" style="margin-bottom:10px">
+    <label class="lbl">Hareket (Kütüphaneden) *<select id="exMovement" class="inp">
+      <option value="">— Seç —</option>
+      ${movements.map(m=>`<option value="${m.id}"${exForm.movementId===m.id?" selected":""}>${m.name}</option>`).join("")}
+    </select></label>
+    <label class="lbl">Program *<select id="exStyle" class="inp" onchange="exStyleChange(this.value)">
+      <option value="">— Seç —</option>
+      ${styles.map(s=>`<option value="${s.id}"${exForm.styleId===s.id?" selected":""}>${s.icon} ${s.name}</option>`).join("")}
+    </select></label>
+  </div>
+  <label class="lbl" style="margin-bottom:10px">Ölçüm Türü
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button type="button" class="fBtn${!isDuration?" active":""}" style="flex:1;padding:8px" onclick="exTypeChange('reps')">🔢 Tekrar Bazlı</button>
+      <button type="button" class="fBtn${isDuration?" active":""}" style="flex:1;padding:8px" onclick="exTypeChange('duration')">⏱ Süre Bazlı</button>
+    </div>
+  </label>
+  <div class="gridForm" style="margin-bottom:12px">
+    <label class="lbl">Set<input id="exSets" type="number" min="1" max="20" class="inp" value="${exForm.sets}" style="width:80px"/></label>
+    ${isDuration?`
+    <label class="lbl">Süre (dk)<input id="exDurMin" type="number" min="0" class="inp" value="${Math.floor((exForm.reps||0)/60)}" style="width:70px"/></label>
+    <label class="lbl">Süre (sn)<input id="exDurSec" type="number" min="0" max="59" class="inp" value="${(exForm.reps||0)%60}" style="width:70px"/></label>
+    `:`
+    <label class="lbl">Tekrar<input id="exReps" type="number" min="1" class="inp" value="${exForm.reps}" style="width:80px"/></label>
+    `}
+  </div>
+  <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:${canSS?"#aaa":"#444"};padding:8px 10px;border-radius:8px;background:rgba(167,139,250,.05);border:1px solid rgba(167,139,250,.15);margin-bottom:12px;cursor:${canSS?"pointer":"default"}">
+    <input type="checkbox" id="exSS"${canSS&&exForm.superset?" checked":""} ${canSS?"":"disabled"} style="width:16px;height:16px;accent-color:#a78bfa"/>
+    ${canSS?`🔗 Süperset — <strong style="color:#a78bfa">"${prevEx.name}"</strong> ile ardı ardına`:"🔗 Süperset (önce bir hareket eklenmeli)"}
+  </label>
+  <div style="display:flex;gap:8px">
+    <button class="btn" onclick="submitEx()">${exEditId?"💾 Güncelle":"➕ Programa Ekle"}</button>
+    ${exEditId?`<button class="btn-ghost" onclick="cancelExEdit()">İptal</button>`:""}
+  </div>`;
+  main.appendChild(fc);
+  const fr=el("div");fr.style.marginBottom="12px";
+  fr.innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <input class="inp" style="flex:1;min-width:130px" placeholder="🔍 Ara..." value="${exSearch}" oninput="exSearch=this.value;render()"/>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${[{id:"",name:"Tümü"},...styles].map(s=>`<button class="fBtn${exFilter===s.id?" active":""}" onclick="exFilter='${s.id}';render()">${s.icon||""} ${s.name}</button>`).join("")}</div>
+  </div>`;
+  main.appendChild(fr);
+  const filtered=exercises.filter(e=>exFilter?(e.styleId||e.style_id)===exFilter:true).filter(e=>exSearch?e.name.toLowerCase().includes(exSearch.toLowerCase()):true);
+  const tw=el("div","tblWrap");let rows="";
+  filtered.forEach(ex=>{
+    const st=getStyle(ex.styleId||ex.style_id);
+    const isD=ex.type==="duration";
+    const valDisplay=isD?`${Math.floor(ex.reps/60)}:${String(ex.reps%60).padStart(2,"0")}`:ex.reps;
+    rows+=`<tr><td>
+        <strong style="color:#e8e8f0">${ex.name}</strong>
+        ${ex.superset_group?`<span class="ssBadge">🔗 grup ${ex.superset_group.slice(-4)}</span>`:(ex.superset?`<span class="ssBadge">🔗 süperset</span>`:"")}
+      </td>
+      <td><span style="font-size:11px;padding:2px 8px;border-radius:12px;background:${st.color}18;color:${st.color}">${st.icon} ${st.name}</span></td>
+      <td style="text-align:center"><span class="tag2">${ex.sets}</span></td>
+      <td style="text-align:center"><span class="tag2">${isD?"⏱ ":""}${valDisplay}</span></td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn-edit exBtn" style="padding:4px 7px" data-action="up" data-id="${ex.id}">↑</button>
+        <button class="btn-edit exBtn" style="padding:4px 7px" data-action="down" data-id="${ex.id}">↓</button>
+        <button class="btn-edit exBtn" style="color:#a78bfa;padding:4px 7px" data-action="ss" data-id="${ex.id}" title="Süperset bağla/ayır">🔗</button>
+        <button class="btn-edit exBtn" data-action="edit" data-id="${ex.id}">✏️</button>
+        <button class="btn-red exBtn" data-action="del" data-id="${ex.id}">🗑️</button>
+      </td></tr>`;
+  });
+  tw.innerHTML=`<table class="tbl"><thead><tr><th>Hareket</th><th>Program</th><th style="text-align:center">Set</th><th style="text-align:center">Tekrar/Süre</th><th style="text-align:right">İşlem</th></tr></thead><tbody>${rows||`<tr><td colspan="5" style="text-align:center;color:#444;padding:28px 0">Bu programa henüz hareket atanmamış</td></tr>`}</tbody></table>
+  <div style="padding:8px 14px;font-size:11px;color:#444;border-top:1px solid rgba(255,255,255,.05)">${filtered.length} kayıt • ${exercises.length} toplam</div>`;
+  // Event delegation — data-* attribute ile buton olaylarını yakala
+  tw.addEventListener('click',function(e){
+    const btn=e.target.closest('.exBtn');
+    if(!btn)return;
+    e.stopPropagation();
+    const id=btn.dataset.id;
+    const action=btn.dataset.action;
+    if(action==='up')moveEx(id,'up');
+    else if(action==='down')moveEx(id,'down');
+    else if(action==='ss')toggleSupersetUI(id);
+    else if(action==='edit')startExEdit(id);
+    else if(action==='del')delEx(id);
+  });
+  main.appendChild(tw);
+}
+function exStyleChange(v){exForm={...exForm,styleId:v,superset:false};render();}
+function exTypeChange(t){exForm={...exForm,type:t};render();}
+async function submitEx(){
+  const movementId=$('#exMovement')?.value,styleId=$('#exStyle')?.value,sets=+$('#exSets')?.value,superset=$('#exSS')?.checked||false;
+  const type=exForm.type||"reps";
+  if(!movementId){alert("Kütüphaneden bir hareket seçmelisin!");return;}
+  if(!styleId){alert("Program seçmelisin!");return;}
+  const mv=movements.find(m=>m.id===movementId);
+  const name=mv?mv.name:"";
+  let reps;
+  if(type==="duration"){
+    const min=+$('#exDurMin')?.value||0,sec=+$('#exDurSec')?.value||0;
+    reps=min*60+sec;
+    if(!reps){alert("Süre zorunlu!");return;}
+  }else{
+    reps=+$('#exReps')?.value;
+    if(!reps){alert("Tekrar sayısı zorunlu!");return;}
+  }
+  const item={name,movement_id:movementId,movementId,style_id:styleId,styleId,sets,reps,type,superset,profile_id:profileId};
+  showSync("syncing","⟳ Kaydediliyor…");
+  try{
+    if(exEditId){
+      await sbUpdate("exercises",`id=eq.${exEditId}`,{name,movement_id:movementId,style_id:styleId,sets,reps,type,superset});
+      exercises=exercises.map(e=>e.id===exEditId?{...e,...item}:e);exEditId=null;
+    }else{
+      const id=uid();
+      // Bu programa ait mevcut hareketlerin max order_index'ini bul, yeni hareket sona gitsin
+      const styleExs=exercises.filter(e=>(e.styleId||e.style_id)===styleId);
+      const maxOrder=styleExs.reduce((max,e)=>Math.max(max,e.order_index||0),0);
+      const orderIndex=maxOrder+1;
+      await sbInsert("exercises",[{id,profile_id:profileId,name,movement_id:movementId,style_id:styleId,sets,reps,type,superset,order_index:orderIndex}]);
+      exercises=[...exercises,{id,...item,order_index:orderIndex}];
+    }
+    exForm={name:"",styleId:"",movementId:"",sets:3,reps:10,type:"reps",superset:false};cacheAll();showSync("ok","✓ Kaydedildi");render();
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+}
+function startExEdit(id){const ex=exercises.find(e=>e.id===id);if(!ex)return;exEditId=id;exForm={name:ex.name,styleId:ex.styleId||ex.style_id,movementId:ex.movementId||ex.movement_id,sets:ex.sets,reps:ex.reps,type:ex.type||"reps",superset:!!ex.superset};render();}
+function cancelExEdit(){exEditId=null;exForm={name:"",styleId:"",movementId:"",sets:3,reps:10,type:"reps",superset:false};render();}
+async function delEx(id){
+  exercises=exercises.filter(e=>e.id!==id);cacheAll();
+  try{await sbDelete("exercises",`id=eq.${id}`);}catch(e){console.error(e);}
+  render();
+}
+
+async function moveEx(id, direction){
+  const ex=exercises.find(e=>e.id===id);
+  if(!ex)return;
+  const styleId=ex.styleId||ex.style_id;
+
+  // Bu programa ait hareketleri sıraya koy
+  let styleExs=[...exercises.filter(e=>(e.styleId||e.style_id)===styleId)]
+    .sort((a,b)=>(a.order_index??0)-(b.order_index??0));
+
+  const idx=styleExs.findIndex(e=>e.id===id);
+  if(direction==="up" && idx<=0)return;
+  if(direction==="down" && idx>=styleExs.length-1)return;
+
+  const swapIdx=direction==="up"?idx-1:idx+1;
+
+  // Dizide yer değiştir
+  const temp=styleExs[idx];
+  styleExs[idx]=styleExs[swapIdx];
+  styleExs[swapIdx]=temp;
+
+  // Yeni order_index değerlerini sıfırdan ata (0,1,2,3...)
+  const updates=[];
+  styleExs.forEach((e,i)=>{
+    if(e.order_index!==i){
+      updates.push({id:e.id, order_index:i});
+    }
+  });
+
+  // Local state güncelle ve hemen cihaza kaydet
+  exercises=exercises.map(e=>{
+    const upd=updates.find(u=>u.id===e.id);
+    return upd?Object.assign({},e,{order_index:upd.order_index}):e;
+  });
+  cacheAll();
+
+  // Supabase'e kaydet, sonra veriyi taze çekip aynı ekranı yenile
+  showSync("syncing","⟳ Sıra kaydediliyor…");
+  try{
+    await Promise.all(updates.map(u=>sbUpdate("exercises",`id=eq.${u.id}`,{order_index:u.order_index})));
+    // Taze veri çek ve aynı sekmeyi yeniden çiz
+    await loadFromSupabase(profileId);
+    const scrollY=window.scrollY;
+    activeTab="admin";
+    adminSec="exercises";
+    render();
+    setTimeout(()=>window.scrollTo(0,scrollY),50);
+    showSync("ok","✓ Sıra güncellendi");
+  }catch(e){
+    showSync("err","⚠ Hata");
+    console.error(e);
+  }
+}
+
+// Süperset bağlama/ayırma UI — modal benzeri seçim
+function toggleSupersetUI(id){
+  const ex=exercises.find(e=>e.id===id);
+  if(!ex)return;
+  const styleId=ex.styleId||ex.style_id;
+  const styleExs=exercises
+    .filter(e=>(e.styleId||e.style_id)===styleId && e.id!==id)
+    .sort((a,b)=>(a.order_index||0)-(b.order_index||0));
+
+  // Zaten bir gruba bağlıysa — ayır seçeneği sun
+  if(ex.superset_group){
+    const groupMembers=exercises.filter(e=>e.superset_group===ex.superset_group);
+    const names=groupMembers.map(e=>e.name).join(" + ");
+    if(confirm(`"${ex.name}" şu an [${names}] süperset grubunda.\n\nGruptan ayırmak ister misin?`)){
+      unlinkSuperset(id, ex.superset_group);
+    }
+    return;
+  }
+
+  // Bağlı değilse — hangi hareketle bağlansın seçtir
+  if(!styleExs.length){alert("Bu programda bağlanacak başka hareket yok.");return;}
+  const options=styleExs.map((e,i)=>`${i+1}. ${e.name}${e.superset_group?" (zaten grupta)":""}`).join("\n");
+  const choice=prompt(`"${ex.name}" hangi hareketle süperset yapılsın?\n\nNumara gir:\n${options}`);
+  const choiceIdx=parseInt(choice)-1;
+  if(isNaN(choiceIdx)||choiceIdx<0||choiceIdx>=styleExs.length)return;
+  const targetEx=styleExs[choiceIdx];
+  linkSuperset(id, targetEx.id);
+}
+
+async function linkSuperset(id1, id2){
+  const ex1=exercises.find(e=>e.id===id1);
+  const ex2=exercises.find(e=>e.id===id2);
+  if(!ex1||!ex2)return;
+  // Hedef zaten bir gruptaysa, aynı gruba ekle; yoksa yeni grup oluştur
+  const groupId=ex2.superset_group||uid();
+  exercises=exercises.map(e=>{
+    if(e.id===id1||e.id===id2)return{...e,superset_group:groupId,superset:true};
+    return e;
+  });
+  cacheAll();
+  showSync("syncing","⟳ Süperset kaydediliyor…");
+  try{
+    await Promise.all([
+      sbUpdate("exercises",`id=eq.${id1}`,{superset_group:groupId,superset:true}),
+      sbUpdate("exercises",`id=eq.${id2}`,{superset_group:groupId,superset:true}),
+    ]);
+    showSync("ok","✓ Süperset oluşturuldu");
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+  render();
+}
+
+async function unlinkSuperset(id, groupId){
+  // Gruptan sadece bu hareketi çıkar
+  exercises=exercises.map(e=>{
+    if(e.id===id)return{...e,superset_group:null,superset:false};
+    return e;
+  });
+  // Grupta tek kişi kaldıysa onu da ayır
+  const remaining=exercises.filter(e=>e.superset_group===groupId);
+  if(remaining.length===1){
+    exercises=exercises.map(e=>e.id===remaining[0].id?{...e,superset_group:null,superset:false}:e);
+    await sbUpdate("exercises",`id=eq.${remaining[0].id}`,{superset_group:null,superset:false});
+  }
+  cacheAll();
+  showSync("syncing","⟳ Kaydediliyor…");
+  try{
+    await sbUpdate("exercises",`id=eq.${id}`,{superset_group:null,superset:false});
+    showSync("ok","✓ Süpersetten ayrıldı");
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+  render();
+}
+
+function renderAdminStyles(main){
+  const fc=el("div","card");
+  fc.innerHTML=`<div class="cardTitle">${stEditId?"✏️ Programı Düzenle":"➕ Yeni Antrenman Programı"}</div>
+  <p style="font-size:12px;color:#555;margin-bottom:12px">Seçilince hareketler direkt gelir.</p>
+  <div class="gridForm" style="margin-bottom:12px">
+    <label class="lbl">Emoji İkon<input id="stIcon" class="inp" value="${stForm.icon}" style="width:70px"/></label>
+    <label class="lbl">Program Adı *<input id="stName" class="inp" value="${stForm.name}" placeholder="örn. İtiş"/></label>
+    <label class="lbl">Renk<div style="display:flex;align-items:center;gap:8px"><input type="color" id="stColor" value="${stForm.color}" style="width:44px;height:38px;border:none;border-radius:8px;cursor:pointer;background:transparent"/><span style="font-size:12px;color:#666" id="stColorLbl">${stForm.color}</span></div></label>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn" onclick="submitStyle()">${stEditId?"💾 Güncelle":"➕ Ekle"}</button>
+    ${stEditId?`<button class="btn-ghost" onclick="cancelStEdit()">İptal</button>`:""}
+  </div>`;
+  main.appendChild(fc);
+  fc.querySelector('#stColor')?.addEventListener('input',function(){const l=fc.querySelector('#stColorLbl');if(l)l.textContent=this.value;});
+  const tw=el("div","tblWrap");let rows="";
+  styles.forEach(s=>{rows+=`<tr><td style="font-size:22px">${s.icon}</td><td style="font-weight:700;color:${s.color}">${s.name}</td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:16px;height:16px;border-radius:4px;background:${s.color}"></div><span style="font-size:12px;color:#666">${s.color}</span></div></td><td style="text-align:right"><button class="btn-edit" onclick="startStEdit('${s.id}')">✏️</button><button class="btn-red" onclick="delStyle('${s.id}')">🗑️</button></td></tr>`;});
+  tw.innerHTML=`<table class="tbl"><thead><tr><th>İkon</th><th>Ad</th><th>Renk</th><th style="text-align:right">İşlem</th></tr></thead><tbody>${rows}</tbody></table><div style="padding:8px 14px;font-size:11px;color:#444;border-top:1px solid rgba(255,255,255,.05)">${styles.length} program</div>`;
+  main.appendChild(tw);
+}
+async function submitStyle(){
+  const icon=$('#stIcon')?.value,name=$('#stName')?.value.trim(),color=$('#stColor')?.value;
+  if(!name){alert("Program adı zorunlu!");return;}
+  showSync("syncing","⟳ Kaydediliyor…");
+  try{
+    if(stEditId){
+      await sbUpdate("styles",`id=eq.${stEditId}`,{icon,name,color});
+      styles=styles.map(s=>s.id===stEditId?{...s,icon,name,color}:s);stEditId=null;
+    }else{
+      const id=uid();
+      await sbInsert("styles",[{id,profile_id:profileId,icon,name,color}]);
+      styles=[...styles,{id,icon,name,color}];
+    }
+    stForm={name:"",icon:"🏋️",color:"#e74c3c"};cacheAll();showSync("ok","✓ Kaydedildi");render();
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+}
+function startStEdit(id){const s=styles.find(x=>x.id===id);if(!s)return;stEditId=id;stForm={name:s.name,icon:s.icon,color:s.color};render();}
+function cancelStEdit(){stEditId=null;stForm={name:"",icon:"🏋️",color:"#e74c3c"};render();}
+async function delStyle(id){
+  styles=styles.filter(s=>s.id!==id);cacheAll();
+  try{await sbDelete("styles",`id=eq.${id}`);}catch(e){console.error(e);}
+  render();
+}
+
+function renderAdminData(main){
+  const d=el("div");
+  d.innerHTML=`
+  <div class="card" style="border-color:rgba(0,212,255,.2);margin-bottom:12px">
+    <div class="cardTitle" style="color:#00d4ff">🔄 Cihazlar Arası Senkronizasyon</div>
+    <p style="font-size:13px;color:#888;margin-bottom:14px;line-height:1.7">
+      Veriler Supabase'de saklanıyor. Aynı isme sahip profil ile giriş yaptığında
+      tüm cihazlardan (telefon, PC, tablet) aynı verilere erişirsin.<br><br>
+      <strong style="color:#e8e8f0">Mevcut Profil:</strong> <span style="color:var(--cyan)">${profile.name}</span><br>
+      <strong style="color:#e8e8f0">Profil ID:</strong> <span style="color:#555;font-size:11px">${profileId}</span>
+    </p>
+    <button class="btn" onclick="manualSync()">⟳ Şimdi Senkronize Et</button>
+  </div>
+  <div class="card" style="border-color:rgba(231,76,60,.3)">
+    <div class="cardTitle" style="color:#e74c3c">⚠️ Tehlikeli Bölge</div>
+    <p style="font-size:13px;color:#888;margin-bottom:14px">Tüm veriler Supabase'den ve bu cihazdan silinir.</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:8px;border:1px solid rgba(231,76,60,.15);background:rgba(231,76,60,.04)" id="resetArea">
+      <div><div style="font-weight:700;color:#e8e8f0;font-size:14px">🗑️ Profili Sil</div><div style="font-size:12px;color:#666;margin-top:4px">Geri alınamaz.</div></div>
+      <button class="btn-red" style="padding:6px 14px;font-size:13px" onclick="confirmReset()">🗑️ Sil</button>
+    </div>
+  </div>`;
+  main.appendChild(d);
+}
+async function manualSync(){
+  if(!profileId)return;
+  await loadFromSupabase(profileId);
+  render();
+}
+function confirmReset(){
+  const ra=$('#resetArea');if(!ra)return;
+  ra.innerHTML=`<div><div style="font-weight:700;color:#e8e8f0">Emin misin?</div></div>
+  <div style="display:flex;gap:6px">
+    <button class="btn" style="background:#e74c3c" onclick="doReset()">Evet, Sil</button>
+    <button class="btn-ghost" onclick="render()">İptal</button>
+  </div>`;
+}
+async function doReset(){
+  showSync("syncing","⟳ Siliniyor…");
+  try{
+    await sbDelete("logs",`profile_id=eq.${profileId}`);
+    await sbDelete("checkins",`profile_id=eq.${profileId}`);
+    await sbDelete("exercises",`profile_id=eq.${profileId}`);
+    await sbDelete("movements",`profile_id=eq.${profileId}`);
+    await sbDelete("styles",`profile_id=eq.${profileId}`);
+    await sbDelete("profiles",`id=eq.${profileId}`);
+  }catch(e){console.error(e);}
+  Object.values(K).forEach(k=>localStorage.removeItem(k));
+  window.location.reload();
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────
+async function boot(){
+  try{
+    // Kalan sessionStorage varsa temizle (eski versiyondan kalma)
+    try{sessionStorage.removeItem("il_restore_state");}catch(e){}
+
+    if(profileId){
+      render(); // önce cache ile göster
+      await loadFromSupabase(profileId);
+      render(); // supabase verisiyle yenile
+    }else{
+      render(); // onboarding
+    }
+  }catch(e){
+    console.error(e);
+    render();
+  }
+}
+
+boot();
+</script>
+</body>
+</html>
