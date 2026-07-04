@@ -14,7 +14,7 @@ html,body{background:#0a0a14;min-height:100%;font-family:'Segoe UI',system-ui,sa
 input,select,button,textarea{font-family:inherit;font-size:14px}
 select option{background:#1a1a2e}
 :root{--cyan:#00d4ff;--purple:#a78bfa;--red:#e74c3c;--orange:#f39c12;--green:#27ae60;--bg:#0a0a14;--card:rgba(255,255,255,.04);--border:rgba(255,255,255,.08)}
-#hdr{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:52px;background:rgba(10,10,20,.97);border-bottom:1px solid rgba(0,212,255,.15);gap:8px}
+#hdr{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;min-height:52px;background:rgba(10,10,20,.97);border-bottom:1px solid rgba(0,212,255,.15);gap:8px}
 #logo{display:flex;align-items:center;gap:7px;flex-shrink:0}
 #logoTxt{font-size:18px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 #greet{flex:1;min-width:80px;text-align:right}
@@ -24,7 +24,7 @@ select option{background:#1a1a2e}
 .navBtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px 10px;border:none;background:transparent;color:#666;cursor:pointer;font-weight:700;letter-spacing:.5px;font-size:10px}
 .navBtn span:first-child{font-size:19px}
 .navBtn.active{color:var(--cyan);box-shadow:inset 0 2px 0 var(--cyan)}
-#main{margin-top:52px;padding:18px 16px calc(78px + env(safe-area-inset-bottom,0px));max-width:720px;margin-left:auto;margin-right:auto}
+#main{margin-top:calc(72px + env(safe-area-inset-top,0px));padding:18px 16px calc(78px + env(safe-area-inset-bottom,0px));max-width:720px;margin-left:auto;margin-right:auto}
 .card{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:12px}
 .cardTitle{font-size:12px;font-weight:700;letter-spacing:1px;color:#aaa;text-transform:uppercase;margin-bottom:12px}
 .inp{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#e8e8f0;outline:none}
