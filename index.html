@@ -14,16 +14,17 @@ html,body{background:#0a0a14;min-height:100%;font-family:'Segoe UI',system-ui,sa
 input,select,button,textarea{font-family:inherit;font-size:14px}
 select option{background:#1a1a2e}
 :root{--cyan:#00d4ff;--purple:#a78bfa;--red:#e74c3c;--orange:#f39c12;--green:#27ae60;--bg:#0a0a14;--card:rgba(255,255,255,.04);--border:rgba(255,255,255,.08)}
-#hdr{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:56px;background:rgba(10,10,20,.97);border-bottom:1px solid rgba(0,212,255,.15);gap:8px;flex-wrap:wrap}
+#hdr{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:52px;background:rgba(10,10,20,.97);border-bottom:1px solid rgba(0,212,255,.15);gap:8px}
 #logo{display:flex;align-items:center;gap:7px;flex-shrink:0}
 #logoTxt{font-size:18px;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-#greet{flex:1;min-width:80px}
+#greet{flex:1;min-width:80px;text-align:right}
 #greetName{font-size:12px;font-weight:700}
 #greetSub{font-size:11px;color:#666;margin-top:2px}
-#nav{display:flex;gap:2px}
-.navBtn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 9px;border-radius:6px;border:none;background:transparent;color:#666;cursor:pointer;font-weight:700;letter-spacing:1px;font-size:10px}
-.navBtn.active{background:rgba(0,212,255,.1);color:var(--cyan);box-shadow:inset 0 -2px 0 var(--cyan)}
-#main{margin-top:56px;padding:18px 16px;max-width:720px;margin-left:auto;margin-right:auto}
+#bottomNav{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-around;align-items:stretch;background:rgba(10,10,20,.98);border-top:1px solid rgba(0,212,255,.15);padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(10px)}
+.navBtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px 10px;border:none;background:transparent;color:#666;cursor:pointer;font-weight:700;letter-spacing:.5px;font-size:10px}
+.navBtn span:first-child{font-size:19px}
+.navBtn.active{color:var(--cyan);box-shadow:inset 0 2px 0 var(--cyan)}
+#main{margin-top:52px;padding:18px 16px calc(78px + env(safe-area-inset-bottom,0px));max-width:720px;margin-left:auto;margin-right:auto}
 .card{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:12px}
 .cardTitle{font-size:12px;font-weight:700;letter-spacing:1px;color:#aaa;text-transform:uppercase;margin-bottom:12px}
 .inp{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#e8e8f0;outline:none}
@@ -81,7 +82,7 @@ label.lbl{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#555;l
 .exAdminCard{background:rgba(255,255,255,.03);border-radius:10px;border:1px solid rgba(255,255,255,.07);padding:10px 12px}
 .pageTitle{font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:14px}
 /* sync status */
-#syncBar{position:fixed;bottom:0;left:0;right:0;z-index:99;padding:6px 16px;font-size:12px;font-weight:700;text-align:center;transition:all .3s;display:none}
+#syncBar{position:fixed;bottom:60px;left:0;right:0;z-index:99;padding:6px 16px;font-size:12px;font-weight:700;text-align:center;transition:all .3s;display:none}
 #syncBar.show{display:block}
 #syncBar.syncing{background:rgba(243,156,18,.15);color:#f39c12;border-top:1px solid rgba(243,156,18,.3)}
 #syncBar.ok{background:rgba(39,174,96,.12);color:#27ae60;border-top:1px solid rgba(39,174,96,.2)}
@@ -95,9 +96,9 @@ label.lbl{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#555;l
 <div id="hdr">
   <div id="logo"><span style="font-size:18px">⚡</span><span id="logoTxt">IRONLOG</span></div>
   <div id="greet"><div id="greetName"></div><div id="greetSub"></div></div>
-  <nav id="nav"></nav>
 </div>
 <div id="main"></div>
+<nav id="bottomNav"></nav>
 <div id="syncBar"></div>
 
 <script>
@@ -332,12 +333,12 @@ function render(){
 }
 
 function updateHeader(){
-  if(!profile){$('#greetName').textContent="";$('#greetSub').textContent="";$('#nav').innerHTML="";return;}
+  if(!profile){$('#greetName').textContent="";$('#greetSub').textContent="";$('#bottomNav').innerHTML="";return;}
   $('#greetName').textContent=`${profile.name} 👋`;
   const lci=checkins[0];
   $('#greetSub').textContent=lci?`${lci.weight} kg${lci.body_fat?` · %${lci.body_fat} yağ`:""}` :"";
   const tabs=[["workout","🏋️","ANTRENMAN"],["progress","📊","İLERLEME"],["body","⚖️","VÜCUT"],["admin","⚙️","AYARLAR"]];
-  $('#nav').innerHTML=tabs.map(([id,icon,label])=>`<button class="navBtn${activeTab===id?" active":""}" onclick="setTab('${id}')">${icon}<span>${label}</span></button>`).join("");
+  $('#bottomNav').innerHTML=tabs.map(([id,icon,label])=>`<button class="navBtn${activeTab===id?" active":""}" onclick="setTab('${id}')"><span>${icon}</span><span>${label}</span></button>`).join("");
 }
 function setTab(t){activeTab=t;render();}
 function renderTab(main){
