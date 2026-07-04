@@ -78,6 +78,7 @@ label.lbl{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#555;l
 .fBtn{padding:5px 10px;border-radius:20px;border:1px solid #222;background:transparent;color:#666;cursor:pointer;font-size:11px;font-weight:700}
 .fBtn.active{background:rgba(167,139,250,.15);color:var(--purple);border-color:rgba(167,139,250,.4)}
 .ssBadge{font-size:10px;font-weight:700;color:var(--purple);background:rgba(167,139,250,.12);padding:2px 6px;border-radius:8px;margin-left:6px}
+.exAdminCard{background:rgba(255,255,255,.03);border-radius:10px;border:1px solid rgba(255,255,255,.07);padding:10px 12px}
 .pageTitle{font-size:20px;font-weight:900;letter-spacing:2px;margin-bottom:14px}
 /* sync status */
 #syncBar{position:fixed;bottom:0;left:0;right:0;z-index:99;padding:6px 16px;font-size:12px;font-weight:700;text-align:center;transition:all .3s;display:none}
@@ -1010,7 +1011,7 @@ function renderAdminExercises(main){
   const fc=el("div","card");
   fc.innerHTML=`<div class="cardTitle">${exEditId?"✏️ Program Hareketini Düzenle":"➕ Programa Hareket Ekle"}</div>
   <div class="gridForm" style="margin-bottom:10px">
-    <label class="lbl">Hareket (Kütüphaneden) *<select id="exMovement" class="inp">
+    <label class="lbl">Hareket (Kütüphaneden) *<select id="exMovement" class="inp" onchange="exMovementChange(this.value)">
       <option value="">— Seç —</option>
       ${movements.map(m=>`<option value="${m.id}"${exForm.movementId===m.id?" selected":""}>${m.name}</option>`).join("")}
     </select></label>
@@ -1055,23 +1056,29 @@ function renderAdminExercises(main){
     const st=getStyle(ex.styleId||ex.style_id);
     const isD=ex.type==="duration";
     const valDisplay=isD?`${Math.floor(ex.reps/60)}:${String(ex.reps%60).padStart(2,"0")}`:ex.reps;
-    rows+=`<tr><td>
-        <strong style="color:#e8e8f0">${ex.name}</strong>
-        ${ex.superset_group?`<span class="ssBadge">🔗 grup ${ex.superset_group.slice(-4)}</span>`:(ex.superset?`<span class="ssBadge">🔗 süperset</span>`:"")}
-      </td>
-      <td><span style="font-size:11px;padding:2px 8px;border-radius:12px;background:${st.color}18;color:${st.color}">${st.icon} ${st.name}</span></td>
-      <td style="text-align:center"><span class="tag2">${ex.sets}</span></td>
-      <td style="text-align:center"><span class="tag2">${isD?"⏱ ":""}${valDisplay}</span></td>
-      <td style="text-align:right;white-space:nowrap">
-        <button class="btn-edit exBtn" style="padding:4px 7px" data-action="up" data-id="${ex.id}">↑</button>
-        <button class="btn-edit exBtn" style="padding:4px 7px" data-action="down" data-id="${ex.id}">↓</button>
-        <button class="btn-edit exBtn" style="color:#a78bfa;padding:4px 7px" data-action="ss" data-id="${ex.id}" title="Süperset bağla/ayır">🔗</button>
-        <button class="btn-edit exBtn" data-action="edit" data-id="${ex.id}">✏️</button>
-        <button class="btn-red exBtn" data-action="del" data-id="${ex.id}">🗑️</button>
-      </td></tr>`;
+    rows+=`<div class="exAdminCard">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;color:#e8e8f0;font-size:14px">${ex.name}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;align-items:center">
+            <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:${st.color}18;color:${st.color}">${st.icon} ${st.name}</span>
+            <span class="tag2">${ex.sets} set</span>
+            <span class="tag2">${isD?"⏱ ":""}${valDisplay}</span>
+            ${ex.superset_group?`<span class="ssBadge">🔗 süperset</span>`:(ex.superset?`<span class="ssBadge">🔗 süperset</span>`:"")}
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;align-items:center">
+          <button class="btn-edit exBtn" style="padding:5px 8px;font-size:15px" data-action="up" data-id="${ex.id}">↑</button>
+          <button class="btn-edit exBtn" style="padding:5px 8px;font-size:15px" data-action="down" data-id="${ex.id}">↓</button>
+          <button class="btn-edit exBtn" style="color:#a78bfa;padding:5px 8px" data-action="ss" data-id="${ex.id}">🔗</button>
+          <button class="btn-edit exBtn" style="padding:5px 8px" data-action="edit" data-id="${ex.id}">✏️</button>
+          <button class="btn-red exBtn" style="padding:5px 8px" data-action="del" data-id="${ex.id}">🗑️</button>
+        </div>
+      </div>
+    </div>`;
   });
-  tw.innerHTML=`<table class="tbl"><thead><tr><th>Hareket</th><th>Program</th><th style="text-align:center">Set</th><th style="text-align:center">Tekrar/Süre</th><th style="text-align:right">İşlem</th></tr></thead><tbody>${rows||`<tr><td colspan="5" style="text-align:center;color:#444;padding:28px 0">Bu programa henüz hareket atanmamış</td></tr>`}</tbody></table>
-  <div style="padding:8px 14px;font-size:11px;color:#444;border-top:1px solid rgba(255,255,255,.05)">${filtered.length} kayıt • ${exercises.length} toplam</div>`;
+  tw.innerHTML=`<div style="display:flex;flex-direction:column;gap:6px">${rows||`<div style="text-align:center;color:#444;padding:28px 0">Bu programa henüz hareket atanmamış</div>`}</div>
+  <div style="padding:8px 4px;font-size:11px;color:#444;margin-top:6px">${filtered.length} kayıt • ${exercises.length} toplam</div>`;
   // Event delegation — data-* attribute ile buton olaylarını yakala
   tw.addEventListener('click',function(e){
     const btn=e.target.closest('.exBtn');
@@ -1087,8 +1094,19 @@ function renderAdminExercises(main){
   });
   main.appendChild(tw);
 }
-function exStyleChange(v){exForm={...exForm,styleId:v,superset:false};render();}
-function exTypeChange(t){exForm={...exForm,type:t};render();}
+function exMovementChange(v){exForm={...exForm,movementId:v};}
+function exStyleChange(v){
+  // Savunma: render'dan önce mevcut hareket seçimini DOM'dan oku, kaybolmasın
+  const currentMovement=$('#exMovement')?.value;
+  exForm={...exForm,styleId:v,movementId:currentMovement||exForm.movementId,superset:false};
+  render();
+}
+function exTypeChange(t){
+  const currentMovement=$('#exMovement')?.value;
+  const currentStyle=$('#exStyle')?.value;
+  exForm={...exForm,type:t,movementId:currentMovement||exForm.movementId,styleId:currentStyle||exForm.styleId};
+  render();
+}
 async function submitEx(){
   const movementId=$('#exMovement')?.value,styleId=$('#exStyle')?.value,sets=+$('#exSets')?.value,superset=$('#exSS')?.checked||false;
   const type=exForm.type||"reps";
@@ -1121,7 +1139,15 @@ async function submitEx(){
       exercises=[...exercises,{id,...item,order_index:orderIndex}];
     }
     exForm={name:"",styleId:"",movementId:"",sets:3,reps:10,type:"reps",superset:false};cacheAll();showSync("ok","✓ Kaydedildi");render();
-  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+  }catch(e){
+    console.error(e);
+    let msg="⚠ Hata";
+    try{
+      const parsed=JSON.parse(e.message);
+      msg="⚠ "+(parsed.message||parsed.hint||e.message);
+    }catch{msg="⚠ "+e.message;}
+    showSync("err",msg);
+  }
 }
 function startExEdit(id){const ex=exercises.find(e=>e.id===id);if(!ex)return;exEditId=id;exForm={name:ex.name,styleId:ex.styleId||ex.style_id,movementId:ex.movementId||ex.movement_id,sets:ex.sets,reps:ex.reps,type:ex.type||"reps",superset:!!ex.superset};render();}
 function cancelExEdit(){exEditId=null;exForm={name:"",styleId:"",movementId:"",sets:3,reps:10,type:"reps",superset:false};render();}
