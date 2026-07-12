@@ -260,9 +260,22 @@ const daysBetween=(a,b)=>Math.abs((new Date(b)-new Date(a))/864e5);
 const el=(tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html)e.innerHTML=html;return e;};
 const $=(s)=>document.querySelector(s);
 
+// Bir hareketin geçmiş kayıtlarını bulur — hem eski id'yi hem de movement_id'yi eşleştirir
+// Böylece hareket silinip tekrar eklendiğinde (yeni id alsa bile) eski geçmiş korunur
+function entryMatches(entry, ex){
+  if(!ex)return false;
+  const exMov=ex.movementId||ex.movement_id;
+  // Doğrudan id eşleşmesi
+  if(entry.exerciseId===ex.id)return true;
+  // movement_id üzerinden eşleşme (aynı kütüphane hareketi)
+  if(exMov && entry.movementId && entry.movementId===exMov)return true;
+  return false;
+}
+
 function lastWeights(exId){
+  const ex=exercises.find(e=>e.id===exId);
   for(const log of logs){
-    const e=log.entries?.find(e=>e.exerciseId===exId);
+    const e=log.entries?.find(en=>entryMatches(en, ex));
     if(e){
       const ws=e.sets?.map(s=>s.weight).filter(Boolean);
       const reps=e.sets?.map(s=>s.reps);
@@ -271,9 +284,10 @@ function lastWeights(exId){
   }return null;
 }
 function exSessions(exId){
+  const ex=exercises.find(e=>e.id===exId);
   const out=[];
   [...logs].sort((a,b)=>(a.timestamp||0)-(b.timestamp||0)).forEach(log=>{
-    const e=log.entries?.find(e=>e.exerciseId===exId);if(!e)return;
+    const e=log.entries?.find(en=>entryMatches(en, ex));if(!e)return;
     const ws=(e.sets||[]).map(s=>parseFloat(s.weight)).filter(w=>!isNaN(w)&&w>0);
     if(!ws.length)return;
     const reps=(e.sets||[]).map(s=>parseInt(s.reps)).filter(r=>!isNaN(r)&&r>0);
@@ -587,7 +601,10 @@ function buildExCard(ex,label){
   const headerRight=isDur?`${ex.sets}×${Math.floor(ex.reps/60)}:${String(ex.reps%60).padStart(2,"0")}`:`${ex.sets}×${ex.reps}`;
   card.innerHTML=`<div class="exHdr">
     <div><div class="exName">${label?`<span class="lblBadge">${label}</span>`:""}${ex.name}</div>${lastHtml}</div>
-    <span style="font-size:11px;color:#555;flex-shrink:0">${headerRight}</span>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <button class="swapExBtn" data-exid="${ex.id}" title="Hareketi değiştir" style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#a78bfa;border-radius:7px;padding:4px 8px;font-size:13px;cursor:pointer">🔄</button>
+      <span style="font-size:11px;color:#555">${headerRight}</span>
+    </div>
   </div><div id="sets_${ex.id}"></div>`;
   const setsDiv=card.querySelector(`#sets_${ex.id}`);
   for(let i=0;i<ex.sets;i++){
@@ -690,7 +707,40 @@ function buildExCard(ex,label){
     if(!val){alert("Hedef ağırlık gir!");return;}
     saveTargetWeight(exId, +val);
   });
+  card.querySelector('.swapExBtn')?.addEventListener('click',function(){
+    swapExercise(this.dataset.exid);
+  });
   return card;
+}
+
+// Antrenman sırasında hareketi kütüphaneden başka bir hareketle değiştir
+async function swapExercise(exId){
+  const ex=exercises.find(e=>e.id===exId);
+  if(!ex)return;
+  if(!movements.length){alert("Kütüphanede hareket yok.");return;}
+  const options=movements.map((m,i)=>`${i+1}. ${m.name}`).join("\n");
+  const choice=prompt(`"${ex.name}" yerine hangi hareketi yapacaksın?\n\nKütüphaneden numara gir:\n${options}`);
+  const idx=parseInt(choice)-1;
+  if(isNaN(idx)||idx<0||idx>=movements.length)return;
+  const newMov=movements[idx];
+  if((ex.movementId||ex.movement_id)===newMov.id)return; // aynı hareket
+
+  showSync("syncing","⟳ Hareket değiştiriliyor…");
+  try{
+    await sbUpdate("exercises",`id=eq.${exId}`,{name:newMov.name, movement_id:newMov.id});
+    // Local state güncelle (kalıcı — sonraki idmanda da yeni haliyle gelir)
+    exercises=exercises.map(e=>e.id===exId?{...e,name:newMov.name,movement_id:newMov.id,movementId:newMov.id}:e);
+    workoutExercises=workoutExercises.map(e=>e.id===exId?{...e,name:newMov.name,movement_id:newMov.id,movementId:newMov.id}:e);
+    // Eski hareketin girilen değerlerini temizle
+    for(let i=0;i<(ex.sets||0);i++){
+      delete workoutWeights[`${exId}_${i}`];
+      delete workoutReps[`${exId}_${i}`];
+      delete workoutDone[`${exId}_${i}`];
+    }
+    cacheAll();
+    showSync("ok","✓ Hareket değiştirildi");
+    render(); // yeni hareketin geçmişi (Önceki: X kg) otomatik gelir
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
 }
 
 async function saveTargetWeight(exId, val){
@@ -720,7 +770,7 @@ async function finishWorkout(){
     id:logId,date:todayTR(),date_iso:todayISO(),dateISO:todayISO(),timestamp:Date.now(),
     style_id:workoutStyle.id,styleId:workoutStyle.id,profile_id:profileId,duration:durationSecs,
     started_at:workoutStartedAt,finished_at:finishedAt,
-    entries:workoutExercises.map(ex=>({exerciseId:ex.id,exerciseName:ex.name,sets:Array.from({length:ex.sets},(_,i)=>({setNum:i+1,reps:workoutReps[`${ex.id}_${i}`]??ex.reps,weight:workoutWeights[`${ex.id}_${i}`]||"",done:!!workoutDone[`${ex.id}_${i}`]}))}))
+    entries:workoutExercises.map(ex=>({exerciseId:ex.id,exerciseName:ex.name,movementId:ex.movementId||ex.movement_id||null,sets:Array.from({length:ex.sets},(_,i)=>({setNum:i+1,reps:workoutReps[`${ex.id}_${i}`]??ex.reps,weight:workoutWeights[`${ex.id}_${i}`]||"",done:!!workoutDone[`${ex.id}_${i}`]}))}))
   };
   logs=[entry,...logs];cacheAll();
   showSync("syncing","⟳ Antrenman kaydediliyor…");
