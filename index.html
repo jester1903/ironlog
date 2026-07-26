@@ -274,14 +274,36 @@ function entryMatches(entry, ex){
 
 function lastWeights(exId){
   const ex=exercises.find(e=>e.id===exId);
+  // Bu harekete ait tüm logları (yeniden eskiye) bul
+  const matched=[];
   for(const log of logs){
     const e=log.entries?.find(en=>entryMatches(en, ex));
     if(e){
       const ws=e.sets?.map(s=>s.weight).filter(Boolean);
-      const reps=e.sets?.map(s=>s.reps);
-      if(ws?.length)return{date:log.date,weights:ws,reps:reps||[]};
+      if(ws?.length)matched.push({log,entry:e});
     }
-  }return null;
+  }
+  if(!matched.length)return null;
+  const lastM=matched[0];      // en son antrenman
+  const prevM=matched[1];      // bir önceki antrenman
+  const ws=lastM.entry.sets?.map(s=>s.weight).filter(Boolean);
+  const reps=lastM.entry.sets?.map(s=>s.reps);
+
+  // Her set için: son antrenman, bir öncekine göre ağırlık VEYA tekrar arttı mı?
+  let improvedSets=null;
+  if(prevM){
+    improvedSets={};
+    (lastM.entry.sets||[]).forEach((s,i)=>{
+      const pv=prevM.entry.sets?.[i];
+      if(!pv)return;
+      const wNow=parseFloat(s.weight), wPrev=parseFloat(pv.weight);
+      const rNow=parseInt(s.reps),  rPrev=parseInt(pv.reps);
+      const wUp=(!isNaN(wNow)&&!isNaN(wPrev)&&wNow>wPrev);
+      const rUp=(!isNaN(rNow)&&!isNaN(rPrev)&&rNow>rPrev);
+      if(wUp||rUp)improvedSets[i]=true;
+    });
+  }
+  return {date:lastM.log.date, weights:ws, reps:reps||[], improvedSets};
 }
 function exSessions(exId){
   const ex=exercises.find(e=>e.id===exId);
@@ -424,14 +446,16 @@ async function submitOnboarding(){
 
 // ── CHECKIN MODAL ─────────────────────────────────────────────────
 function showCheckinModal(){
+  // Zaten açık bir modal varsa tekrar ekleme (render tekrarında çift modal olmasın)
+  if(document.querySelector('.modal'))return;
   const m=el("div","modal");
   m.innerHTML=`<div class="modalCard">
     <div style="font-size:36px;margin-bottom:8px">⚖️</div>
     <div style="font-size:18px;font-weight:900;margin-bottom:6px">Haftalık Tartı Zamanı!</div>
     <div style="font-size:13px;color:#888;margin-bottom:16px;line-height:1.5">Bu haftaki kilonu gir.</div>
     <div class="grid2" style="margin-bottom:14px">
-      <label class="lbl">Kilo (kg) *<input id="ciWeight" type="number" class="inp" placeholder="78"/></label>
-      <label class="lbl">Yağ Oranı %<input id="ciFat" type="number" class="inp" placeholder="18"/></label>
+      <label class="lbl">Kilo (kg) *<input id="ciWeight" type="number" inputmode="decimal" class="inp" placeholder="78"/></label>
+      <label class="lbl">Yağ Oranı %<input id="ciFat" type="number" inputmode="decimal" class="inp" placeholder="18"/></label>
     </div>
     <div style="display:flex;gap:8px">
       <button class="btn" style="flex:1" onclick="saveCheckin()">💾 Kaydet</button>
@@ -441,11 +465,13 @@ function showCheckinModal(){
   document.body.appendChild(m);
 }
 async function saveCheckin(){
-  const w=+$('#ciWeight').value,f=+$('#ciFat').value;
-  if(!w){alert("Kilo zorunlu!");return;}
+  const wRaw=($('#ciWeight')?.value||"").replace(",",".").trim();
+  const fRaw=($('#ciFat')?.value||"").replace(",",".").trim();
+  const w=parseFloat(wRaw), f=parseFloat(fRaw);
+  if(!wRaw||isNaN(w)||w<=0){alert("Kilo zorunlu!");return;}
   showSync("syncing","⟳ Kaydediliyor…");
   try{
-    const [ci]=await sbInsert("checkins",[{id:uid(),profile_id:profileId,date:todayISO(),weight:w,body_fat:f||null}]);
+    const [ci]=await sbInsert("checkins",[{id:uid(),profile_id:profileId,date:todayISO(),weight:w,body_fat:(!isNaN(f)&&f>0)?f:null}]);
     checkins=[ci,...checkins.filter(c=>c.date!==todayISO())];
     cacheAll();showSync("ok","✓ Kaydedildi");closeModal();render();
   }catch(e){showSync("err","⚠ Hata");console.error(e);}
@@ -601,21 +627,33 @@ function buildExCard(ex,label){
   const headerRight=isDur?`${ex.sets}×${Math.floor(ex.reps/60)}:${String(ex.reps%60).padStart(2,"0")}`:`${ex.sets}×${ex.reps}`;
   card.innerHTML=`<div class="exHdr">
     <div><div class="exName">${label?`<span class="lblBadge">${label}</span>`:""}${ex.name}</div>${lastHtml}</div>
-    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.05);border-radius:7px;padding:2px">
+        <button class="setMinusBtn" data-exid="${ex.id}" title="Set azalt" style="background:transparent;border:none;color:#e74c3c;font-size:16px;font-weight:900;width:24px;height:24px;cursor:pointer;border-radius:5px">−</button>
+        <span style="font-size:12px;color:#aaa;min-width:32px;text-align:center">${ex.sets} set</span>
+        <button class="setPlusBtn" data-exid="${ex.id}" title="Set ekle" style="background:transparent;border:none;color:#27ae60;font-size:16px;font-weight:900;width:24px;height:24px;cursor:pointer;border-radius:5px">+</button>
+      </div>
       <button class="swapExBtn" data-exid="${ex.id}" title="Hareketi değiştir" style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#a78bfa;border-radius:7px;padding:4px 8px;font-size:13px;cursor:pointer">🔄</button>
-      <span style="font-size:11px;color:#555">${headerRight}</span>
     </div>
   </div><div id="sets_${ex.id}"></div>`;
   const setsDiv=card.querySelector(`#sets_${ex.id}`);
   for(let i=0;i<ex.sets;i++){
     const k=`${ex.id}_${i}`,isDone=!!workoutDone[k];
     const prevW=last?.weights[i]??last?.weights[0]??"";
+    const prevR=last?.reps?.[i]??last?.reps?.[0];
     // Hedef ağırlık varsa, kg kutusunda varsayılan olarak onu göster ve farklı renkte rozet kullan
     const weightDefault = hasTarget ? ex.target_weight : (workoutWeights[k]||"");
     const isTargetSet = hasTarget && !workoutWeights[k];
-    // Son antrenmanda bu set için girilen tekrar/süre tanımlanan hedeften yüksekse, onu varsayılan göster (progressive overload)
-    const lastRepVal=last?.reps?.[i];
-    const baseTarget=(lastRepVal!=null && +lastRepVal>ex.reps) ? +lastRepVal : ex.reps;
+    // Önceki antrenmandaki tekrar hedeften yüksekse onu varsayılan yap (progressive overload)
+    // Set bazında bak, yoksa o hareketin herhangi bir setindeki en yüksek önceki tekrarı al
+    let lastRepVal=last?.reps?.[i];
+    if(lastRepVal==null && last?.reps?.length)lastRepVal=last.reps[0];
+    const lastRepNum=parseInt(lastRepVal);
+    const defReps=parseInt(ex.reps)||0;
+    const baseTarget=(!isNaN(lastRepNum) && lastRepNum>defReps) ? lastRepNum : (ex.reps);
+    // ▲ ikonu: bir önceki antrenmana göre AĞIRLIK veya TEKRAR arttı mı?
+    // (önceki antrenmanın kendisi, ondan bir önceki antrenmana göre arttıysa göster)
+    const increased = last && last.improvedSets && last.improvedSets[i];
     const row=el("div","setRow");
     if(isDone)row.style.opacity="0.45";
     let middleHtml;
@@ -627,16 +665,17 @@ function buildExCard(ex,label){
         <span style="font-size:10px;color:#555">dk</span>
         <input type="number" class="wInp durSec" style="width:38px" value="${ds}" min="0" max="59" data-exid="${ex.id}" data-set="${i}"/>
         <span style="font-size:10px;color:#555">sn</span>
+        ${increased?`<span style="font-size:10px;color:#27ae60" title="Geçen antrenmana göre artış">▲</span>`:""}
       </div>`;
     }else{
       const repsVal=workoutReps[k]??baseTarget;
       middleHtml=`<div style="display:flex;align-items:center;gap:3px;flex-shrink:0">
         <input type="number" class="wInp repInp" style="width:44px" value="${repsVal}" data-exid="${ex.id}" data-set="${i}" data-kind="reps"/>
-        <span style="font-size:10px;color:#555">tekrar</span>${baseTarget>ex.reps?`<span style="font-size:9px;color:#27ae60">▲</span>`:""}
+        <span style="font-size:10px;color:#555">tekrar</span>${increased?`<span style="font-size:10px;color:#27ae60" title="Geçen antrenmana göre artış">▲</span>`:""}
       </div>`;
     }
     row.innerHTML=`<span style="font-size:12px;color:#555;width:42px;flex-shrink:0">Set ${i+1}</span>
-      ${prevW?`<span class="prevBadge">Önceki: ${prevW} kg</span>`:""}
+      ${prevW?`<span class="prevBadge">Önceki: ${prevW} kg${prevR?` × ${prevR}`:""}</span>`:""}
       ${middleHtml}
       <div style="display:flex;align-items:center;gap:4px;flex:1;justify-content:flex-end">
         <input type="number" class="wInp${isTargetSet?" targetInput":""}" placeholder="${prevW||'kg'}" value="${weightDefault}" data-exid="${ex.id}" data-set="${i}" data-kind="weight"/>
@@ -710,7 +749,39 @@ function buildExCard(ex,label){
   card.querySelector('.swapExBtn')?.addEventListener('click',function(){
     swapExercise(this.dataset.exid);
   });
+  card.querySelector('.setPlusBtn')?.addEventListener('click',function(){
+    changeSetCount(this.dataset.exid, 1);
+  });
+  card.querySelector('.setMinusBtn')?.addEventListener('click',function(){
+    changeSetCount(this.dataset.exid, -1);
+  });
   return card;
+}
+
+// Antrenman sırasında set sayısını değiştir — kalıcı, sonraki idmanda da geçerli
+async function changeSetCount(exId, delta){
+  const ex=exercises.find(e=>e.id===exId);
+  if(!ex)return;
+  const newSets=(ex.sets||0)+delta;
+  if(newSets<1||newSets>20)return;
+  // Local güncelle
+  exercises=exercises.map(e=>e.id===exId?{...e,sets:newSets}:e);
+  workoutExercises=workoutExercises.map(e=>e.id===exId?{...e,sets:newSets}:e);
+  // Set azaltılıyorsa fazla setin girilmiş verisini temizle
+  if(delta<0){
+    delete workoutWeights[`${exId}_${newSets}`];
+    delete workoutReps[`${exId}_${newSets}`];
+    delete workoutDone[`${exId}_${newSets}`];
+  }
+  cacheAll();
+  render(); // kartı yeni set sayısıyla yeniden çiz
+  updateProgress();
+  // Supabase'e kalıcı kaydet
+  showSync("syncing","⟳ Set güncelleniyor…");
+  try{
+    await sbUpdate("exercises",`id=eq.${exId}`,{sets:newSets});
+    showSync("ok","✓ Set sayısı güncellendi");
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
 }
 
 // Antrenman sırasında hareketi kütüphaneden başka bir hareketle değiştir
