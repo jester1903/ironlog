@@ -178,7 +178,7 @@ let logs       = ls(K.logs, []);
 let dismiss    = ls(K.dismiss, null);
 let activeTab  = "workout";
 let workoutStartedAt=null;
-let workoutStyle=null, workoutExercises=[], workoutWeights={}, workoutDone={}, workoutReps={};
+let workoutStyle=null, workoutExercises=[], workoutWeights={}, workoutDone={}, workoutReps={}, manualWeightEdit={};
 let workoutStep=0;
 
 function cacheAll(){
@@ -575,7 +575,7 @@ function buildPreviewCard(ex,label){
 }
 
 function startWorkout(){
-  workoutWeights={};workoutDone={};workoutReps={};workoutStartedAt=Date.now();workoutStep=2;
+  workoutWeights={};workoutDone={};workoutReps={};manualWeightEdit={};workoutStartedAt=Date.now();workoutStep=2;
   render();
 }
 
@@ -641,18 +641,26 @@ function buildExCard(ex,label){
     const k=`${ex.id}_${i}`,isDone=!!workoutDone[k];
     const prevW=last?.weights[i]??last?.weights[0]??"";
     const prevR=last?.reps?.[i]??last?.reps?.[0];
-    // Hedef ağırlık varsa, kg kutusunda varsayılan olarak onu göster ve farklı renkte rozet kullan
-    const weightDefault = hasTarget ? ex.target_weight : (workoutWeights[k]||"");
-    const isTargetSet = hasTarget && !workoutWeights[k];
-    // Önceki antrenmandaki tekrar hedeften yüksekse onu varsayılan yap (progressive overload)
-    // Set bazında bak, yoksa o hareketin herhangi bir setindeki en yüksek önceki tekrarı al
+    // AĞIRLIK varsayılanı — öncelik sırası:
+    // 1) kullanıcı bu antrenmanda girmişse o, 2) hedef ağırlık, 3) bu setin önceki antrenmandaki ağırlığı
+    let weightDefault;
+    let isTargetSet=false;
+    if(workoutWeights[k]!=null && workoutWeights[k]!==""){
+      weightDefault=workoutWeights[k];
+    }else if(hasTarget){
+      weightDefault=ex.target_weight;
+      isTargetSet=true;
+    }else{
+      weightDefault=prevW; // bu setin kendi önceki ağırlığı otomatik gelsin
+    }
+    // TEKRAR varsayılanı — bu setin kendi önceki tekrarı; yoksa (progressive overload) hedef
     let lastRepVal=last?.reps?.[i];
     if(lastRepVal==null && last?.reps?.length)lastRepVal=last.reps[0];
     const lastRepNum=parseInt(lastRepVal);
     const defReps=parseInt(ex.reps)||0;
-    const baseTarget=(!isNaN(lastRepNum) && lastRepNum>defReps) ? lastRepNum : (ex.reps);
+    // Bu setin önceki tekrarı varsa onu kullan (set bazlı hafıza), yoksa hedef tekrar
+    const baseTarget=!isNaN(lastRepNum) ? lastRepNum : ex.reps;
     // ▲ ikonu: bir önceki antrenmana göre AĞIRLIK veya TEKRAR arttı mı?
-    // (önceki antrenmanın kendisi, ondan bir önceki antrenmana göre arttıysa göster)
     const increased = last && last.improvedSets && last.improvedSets[i];
     const row=el("div","setRow");
     if(isDone)row.style.opacity="0.45";
@@ -683,7 +691,19 @@ function buildExCard(ex,label){
       </div>
       <button class="doneBtn${isDone?" on":""}" data-key="${k}">${isDone?"✓":"○"}</button>`;
     setsDiv.appendChild(row);
-    if(isTargetSet && !workoutWeights[k]) workoutWeights[k]=String(ex.target_weight);
+    // Varsayılan değerleri workout state'e yaz ki kaydetmeden de hafızada olsun (set bazlı)
+    if(workoutWeights[k]==null || workoutWeights[k]===""){
+      if(weightDefault!=="" && weightDefault!=null)workoutWeights[k]=String(weightDefault);
+    }
+    if(workoutReps[k]==null || workoutReps[k]===""){
+      if(!isDur){
+        // tekrar bazlı: bu setin varsayılan tekrarını state'e yaz
+        if(baseTarget!=="" && baseTarget!=null)workoutReps[k]=parseInt(baseTarget)||baseTarget;
+      }else{
+        // süre bazlı: saniye değerini state'e yaz
+        workoutReps[k]=parseInt(baseTarget)||0;
+      }
+    }
   }
   // ── Bir sonraki idman için hedef ağırlık belirleme ──
   const targetBox=el("div");
@@ -704,12 +724,21 @@ function buildExCard(ex,label){
     inp.addEventListener('input',function(){
       const exId=this.dataset.exid,si=+this.dataset.set,v=this.value;
       this.classList.remove('targetInput');
+      // Bu seti elle değiştirildi olarak işaretle
+      workoutWeights[`${exId}_${si}`]=v;
+      manualWeightEdit[`${exId}_${si}`]=true;
+      // İlk sete yazınca: sadece HENÜZ ELLE DEĞİŞTİRİLMEMİŞ setlere yay
       if(si===0){
         const ex2=exercises.find(e=>e.id===exId);
-        if(ex2)for(let j=0;j<ex2.sets;j++)workoutWeights[`${exId}_${j}`]=v;
-        card.querySelectorAll('.wInp[data-kind="weight"]').forEach((x,i)=>{if(i>0){x.value=v;x.classList.remove('targetInput');}});
+        if(ex2){
+          card.querySelectorAll('.wInp[data-kind="weight"]').forEach((x,i)=>{
+            if(i>0 && !manualWeightEdit[`${exId}_${i}`]){
+              x.value=v;x.classList.remove('targetInput');
+              workoutWeights[`${exId}_${i}`]=v;
+            }
+          });
+        }
       }
-      else workoutWeights[`${exId}_${si}`]=v;
     });
   });
   card.querySelectorAll('.repInp').forEach(inp=>{
@@ -841,7 +870,26 @@ async function finishWorkout(){
     id:logId,date:todayTR(),date_iso:todayISO(),dateISO:todayISO(),timestamp:Date.now(),
     style_id:workoutStyle.id,styleId:workoutStyle.id,profile_id:profileId,duration:durationSecs,
     started_at:workoutStartedAt,finished_at:finishedAt,
-    entries:workoutExercises.map(ex=>({exerciseId:ex.id,exerciseName:ex.name,movementId:ex.movementId||ex.movement_id||null,sets:Array.from({length:ex.sets},(_,i)=>({setNum:i+1,reps:workoutReps[`${ex.id}_${i}`]??ex.reps,weight:workoutWeights[`${ex.id}_${i}`]||"",done:!!workoutDone[`${ex.id}_${i}`]}))}))
+    entries:workoutExercises.map(ex=>{
+      const last=lastWeights(ex.id); // bu hareketin önceki antrenman değerleri
+      return {
+        exerciseId:ex.id,exerciseName:ex.name,movementId:ex.movementId||ex.movement_id||null,
+        sets:Array.from({length:ex.sets},(_,i)=>{
+          const k=`${ex.id}_${i}`;
+          // Ağırlık: kullanıcı girmişse o; boşsa bu setin önceki antrenmandaki ağırlığı; o da yoksa hedef
+          let weight=workoutWeights[k];
+          if(weight==null||weight===""){
+            weight=last?.weights?.[i]??last?.weights?.[0]??(ex.target_weight??"");
+          }
+          // Tekrar: kullanıcı girmişse o; boşsa önceki antrenman; o da yoksa hedef
+          let reps=workoutReps[k];
+          if(reps==null||reps===""){
+            reps=last?.reps?.[i]??last?.reps?.[0]??ex.reps;
+          }
+          return {setNum:i+1,reps,weight:String(weight),done:!!workoutDone[k]};
+        })
+      };
+    })
   };
   logs=[entry,...logs];cacheAll();
   showSync("syncing","⟳ Antrenman kaydediliyor…");
@@ -851,7 +899,7 @@ async function finishWorkout(){
   }catch(e){showSync("err","⚠ Çevrimdışı kaydedildi");console.error(e);}
   cancelWorkout();
 }
-function cancelWorkout(){workoutStep=0;workoutStyle=null;workoutExercises=[];workoutWeights={};workoutDone={};workoutReps={};workoutStartedAt=null;render();}
+function cancelWorkout(){workoutStep=0;workoutStyle=null;workoutExercises=[];workoutWeights={};workoutDone={};workoutReps={};manualWeightEdit={};workoutStartedAt=null;render();}
 
 // ── PROGRESS ──────────────────────────────────────────────────────
 let progressView="history";
