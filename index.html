@@ -57,7 +57,8 @@ label.lbl{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#555;l
 .wChip{font-size:11px;font-weight:700;color:var(--orange);background:rgba(243,156,18,.12);padding:2px 6px;border-radius:8px;border:1px solid rgba(243,156,18,.25)}
 .targetChip{font-size:11px;font-weight:700;color:#ff5566;background:rgba(255,85,102,.14);padding:2px 7px;border-radius:8px;border:1px solid rgba(255,85,102,.35)}
 .targetInput{border-color:rgba(255,85,102,.5)!important;color:#ff5566!important;background:rgba(255,85,102,.08)!important}
-.setRow{display:flex;align-items:center;gap:8px;padding:7px 14px;flex-wrap:wrap}
+.setRow{display:flex;align-items:center;gap:5px;padding:7px 10px;flex-wrap:nowrap}
+.setRow input[type=number]{min-width:0}
 .prevBadge{font-size:11px;color:var(--orange);background:rgba(243,156,18,.08);padding:2px 6px;border-radius:6px;flex-shrink:0}
 .wInp{width:64px;padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e8f0;font-size:14px;text-align:center;outline:none}
 .doneBtn{width:30px;height:30px;border-radius:7px;border:2px solid #333;background:transparent;color:#555;font-size:15px;cursor:pointer;flex-shrink:0}
@@ -614,6 +615,45 @@ function renderWorkoutActive(main){
     });
     main.appendChild(wrap);
   });
+  // Antrenman sırasında hareket ekle
+  const addBtn=el("button","btn-ghost");
+  addBtn.style.cssText="width:100%;margin-top:10px;padding:12px;border-style:dashed";
+  addBtn.innerHTML="➕ Antrenmana Hareket Ekle";
+  addBtn.onclick=addExerciseToWorkout;
+  main.appendChild(addBtn);
+}
+
+// Antrenman sırasında kütüphaneden yeni hareket ekle (kalıcı — programa da eklenir)
+async function addExerciseToWorkout(){
+  if(!movements.length){alert("Kütüphanede hareket yok. Önce Ayarlar'dan ekle.");return;}
+  const options=movements.map((m,i)=>`${i+1}. ${m.name}`).join("\n");
+  const choice=prompt(`Antrenmana eklenecek hareketi seç:\n\n${options}`);
+  const idx=parseInt(choice)-1;
+  if(isNaN(idx)||idx<0||idx>=movements.length)return;
+  const mov=movements[idx];
+  const setsStr=prompt("Kaç set?","3");
+  const sets=parseInt(setsStr);
+  if(isNaN(sets)||sets<1)return;
+  const repsStr=prompt("Kaç tekrar?","10");
+  const reps=parseInt(repsStr);
+  if(isNaN(reps)||reps<1)return;
+
+  const id=uid();
+  const styleId=workoutStyle.id;
+  // Bu programın en yüksek order_index'ini bul, sona ekle
+  const styleExs=exercises.filter(e=>(e.styleId||e.style_id)===styleId);
+  const maxOrder=styleExs.reduce((mx,e)=>Math.max(mx,e.order_index||0),0);
+  const newEx={id,profile_id:profileId,name:mov.name,movement_id:mov.id,movementId:mov.id,style_id:styleId,styleId,sets,reps,type:"reps",superset:false,order_index:maxOrder+1};
+
+  showSync("syncing","⟳ Hareket ekleniyor…");
+  try{
+    await sbInsert("exercises",[{id,profile_id:profileId,name:mov.name,movement_id:mov.id,style_id:styleId,sets,reps,type:"reps",superset:false,order_index:maxOrder+1}]);
+    exercises=[...exercises,newEx];
+    workoutExercises=[...workoutExercises,newEx];
+    cacheAll();
+    showSync("ok","✓ Hareket eklendi");
+    render();
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
 }
 
 function buildExCard(ex,label){
@@ -626,14 +666,18 @@ function buildExCard(ex,label){
   if(hasTarget)lastHtml+=`<div style="margin-top:4px"><span class="targetChip">🎯 Hedef: ${ex.target_weight} kg</span></div>`;
   const headerRight=isDur?`${ex.sets}×${Math.floor(ex.reps/60)}:${String(ex.reps%60).padStart(2,"0")}`:`${ex.sets}×${ex.reps}`;
   card.innerHTML=`<div class="exHdr">
-    <div><div class="exName">${label?`<span class="lblBadge">${label}</span>`:""}${ex.name}</div>${lastHtml}</div>
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-      <div style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.05);border-radius:7px;padding:2px">
-        <button class="setMinusBtn" data-exid="${ex.id}" title="Set azalt" style="background:transparent;border:none;color:#e74c3c;font-size:16px;font-weight:900;width:24px;height:24px;cursor:pointer;border-radius:5px">−</button>
-        <span style="font-size:12px;color:#aaa;min-width:32px;text-align:center">${ex.sets} set</span>
-        <button class="setPlusBtn" data-exid="${ex.id}" title="Set ekle" style="background:transparent;border:none;color:#27ae60;font-size:16px;font-weight:900;width:24px;height:24px;cursor:pointer;border-radius:5px">+</button>
+    <div style="flex:1;min-width:0"><div class="exName">${label?`<span class="lblBadge">${label}</span>`:""}${ex.name}</div>${lastHtml}
+      <div style="display:flex;gap:4px;margin-top:6px">
+        <button class="wMoveUp" data-exid="${ex.id}" title="Yukarı taşı" style="background:rgba(255,255,255,.06);border:none;color:#888;border-radius:6px;padding:3px 9px;font-size:13px;cursor:pointer">↑</button>
+        <button class="wMoveDown" data-exid="${ex.id}" title="Aşağı taşı" style="background:rgba(255,255,255,.06);border:none;color:#888;border-radius:6px;padding:3px 9px;font-size:13px;cursor:pointer">↓</button>
+        <button class="swapExBtn" data-exid="${ex.id}" title="Hareketi değiştir" style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#a78bfa;border-radius:6px;padding:3px 9px;font-size:13px;cursor:pointer">🔄</button>
+        <button class="wRemoveEx" data-exid="${ex.id}" title="Antrenmandan çıkar" style="background:rgba(231,76,60,.1);border:none;color:#e74c3c;border-radius:6px;padding:3px 9px;font-size:13px;cursor:pointer">🗑️</button>
       </div>
-      <button class="swapExBtn" data-exid="${ex.id}" title="Hareketi değiştir" style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#a78bfa;border-radius:7px;padding:4px 8px;font-size:13px;cursor:pointer">🔄</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:3px;background:rgba(255,255,255,.05);border-radius:7px;padding:2px;flex-shrink:0">
+      <button class="setMinusBtn" data-exid="${ex.id}" title="Set azalt" style="background:transparent;border:none;color:#e74c3c;font-size:16px;font-weight:900;width:22px;height:22px;cursor:pointer;border-radius:5px">−</button>
+      <span style="font-size:11px;color:#aaa;min-width:30px;text-align:center">${ex.sets} set</span>
+      <button class="setPlusBtn" data-exid="${ex.id}" title="Set ekle" style="background:transparent;border:none;color:#27ae60;font-size:16px;font-weight:900;width:22px;height:22px;cursor:pointer;border-radius:5px">+</button>
     </div>
   </div><div id="sets_${ex.id}"></div>`;
   const setsDiv=card.querySelector(`#sets_${ex.id}`);
@@ -668,28 +712,27 @@ function buildExCard(ex,label){
     if(isDur){
       const durVal=workoutReps[k]!=null?workoutReps[k]:baseTarget;
       const dm=Math.floor(durVal/60), ds=durVal%60;
-      middleHtml=`<div style="display:flex;align-items:center;gap:3px;flex-shrink:0">
-        <input type="number" class="wInp durMin" style="width:38px" value="${dm}" min="0" data-exid="${ex.id}" data-set="${i}"/>
-        <span style="font-size:10px;color:#555">dk</span>
-        <input type="number" class="wInp durSec" style="width:38px" value="${ds}" min="0" max="59" data-exid="${ex.id}" data-set="${i}"/>
-        <span style="font-size:10px;color:#555">sn</span>
-        ${increased?`<span style="font-size:10px;color:#27ae60" title="Geçen antrenmana göre artış">▲</span>`:""}
-      </div>`;
+      middleHtml=`<input type="number" class="wInp durMin" style="width:34px" value="${dm}" min="0" data-exid="${ex.id}" data-set="${i}"/><span style="font-size:9px;color:#555">dk</span><input type="number" class="wInp durSec" style="width:34px" value="${ds}" min="0" max="59" data-exid="${ex.id}" data-set="${i}"/><span style="font-size:9px;color:#555">sn</span>${increased?`<span style="font-size:10px;color:#27ae60">▲</span>`:""}`;
     }else{
       const repsVal=workoutReps[k]??baseTarget;
-      middleHtml=`<div style="display:flex;align-items:center;gap:3px;flex-shrink:0">
-        <input type="number" class="wInp repInp" style="width:44px" value="${repsVal}" data-exid="${ex.id}" data-set="${i}" data-kind="reps"/>
-        <span style="font-size:10px;color:#555">tekrar</span>${increased?`<span style="font-size:10px;color:#27ae60" title="Geçen antrenmana göre artış">▲</span>`:""}
-      </div>`;
+      middleHtml=`<input type="number" class="wInp repInp" style="width:42px" value="${repsVal}" data-exid="${ex.id}" data-set="${i}" data-kind="reps"/><span style="font-size:9px;color:#555">tek</span>${increased?`<span style="font-size:10px;color:#27ae60">▲</span>`:""}`;
     }
-    row.innerHTML=`<span style="font-size:12px;color:#555;width:42px;flex-shrink:0">Set ${i+1}</span>
-      ${prevW?`<span class="prevBadge">Önceki: ${prevW} kg${prevR?` × ${prevR}`:""}</span>`:""}
-      ${middleHtml}
-      <div style="display:flex;align-items:center;gap:4px;flex:1;justify-content:flex-end">
-        <input type="number" class="wInp${isTargetSet?" targetInput":""}" placeholder="${prevW||'kg'}" value="${weightDefault}" data-exid="${ex.id}" data-set="${i}" data-kind="weight"/>
-        <span style="font-size:11px;color:#555">kg</span>
+    row.style.flexDirection="column";
+    row.style.alignItems="stretch";
+    row.style.gap="3px";
+    row.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+        <span style="font-size:11px;color:#666;font-weight:600">Set ${i+1}</span>
+        ${prevW?`<span style="font-size:10px;color:var(--orange);background:rgba(243,156,18,.1);padding:1px 6px;border-radius:6px">Önceki: ${prevW}kg${prevR?`×${prevR}`:""}</span>`:`<span></span>`}
       </div>
-      <button class="doneBtn${isDone?" on":""}" data-key="${k}">${isDone?"✓":"○"}</button>`;
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">
+        <div style="display:flex;align-items:center;gap:2px;flex-shrink:0">${middleHtml}</div>
+        <div style="display:flex;align-items:center;gap:3px;flex:1;justify-content:flex-end;flex-shrink:0">
+          <input type="number" class="wInp${isTargetSet?" targetInput":""}" style="width:56px" placeholder="${prevW||'kg'}" value="${weightDefault}" data-exid="${ex.id}" data-set="${i}" data-kind="weight"/>
+          <span style="font-size:10px;color:#555">kg</span>
+        </div>
+        <button class="doneBtn${isDone?" on":""}" data-key="${k}" style="flex-shrink:0">${isDone?"✓":"○"}</button>
+      </div>`;
     setsDiv.appendChild(row);
     // Varsayılan değerleri workout state'e yaz ki kaydetmeden de hafızada olsun (set bazlı)
     if(workoutWeights[k]==null || workoutWeights[k]===""){
@@ -784,7 +827,70 @@ function buildExCard(ex,label){
   card.querySelector('.setMinusBtn')?.addEventListener('click',function(){
     changeSetCount(this.dataset.exid, -1);
   });
+  card.querySelector('.wMoveUp')?.addEventListener('click',function(){
+    moveWorkoutEx(this.dataset.exid,'up');
+  });
+  card.querySelector('.wMoveDown')?.addEventListener('click',function(){
+    moveWorkoutEx(this.dataset.exid,'down');
+  });
+  card.querySelector('.wRemoveEx')?.addEventListener('click',function(){
+    removeWorkoutEx(this.dataset.exid);
+  });
   return card;
+}
+
+// Antrenman sırasında hareketi yukarı/aşağı taşı (kalıcı — programda da sıra değişir)
+async function moveWorkoutEx(exId, direction){
+  const ex=exercises.find(e=>e.id===exId);
+  if(!ex)return;
+  const styleId=ex.styleId||ex.style_id;
+  let styleExs=[...exercises.filter(e=>(e.styleId||e.style_id)===styleId)]
+    .sort((a,b)=>(a.order_index??0)-(b.order_index??0));
+  const idx=styleExs.findIndex(e=>e.id===exId);
+  if(direction==="up" && idx<=0)return;
+  if(direction==="down" && idx>=styleExs.length-1)return;
+  const swapIdx=direction==="up"?idx-1:idx+1;
+  const temp=styleExs[idx];styleExs[idx]=styleExs[swapIdx];styleExs[swapIdx]=temp;
+  const updates=[];
+  styleExs.forEach((e,i)=>{if(e.order_index!==i)updates.push({id:e.id,order_index:i});});
+  exercises=exercises.map(e=>{
+    const upd=updates.find(u=>u.id===e.id);
+    return upd?Object.assign({},e,{order_index:upd.order_index}):e;
+  });
+  // workoutExercises'i yeni sıraya göre güncelle
+  workoutExercises=exercises.filter(e=>(e.styleId||e.style_id)===styleId)
+    .sort((a,b)=>(a.order_index??0)-(b.order_index??0));
+  cacheAll();
+  const scrollY=window.scrollY;
+  render();
+  setTimeout(()=>window.scrollTo(0,scrollY),30);
+  showSync("syncing","⟳ Sıra kaydediliyor…");
+  try{
+    await Promise.all(updates.map(u=>sbUpdate("exercises",`id=eq.${u.id}`,{order_index:u.order_index})));
+    showSync("ok","✓ Sıra güncellendi");
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+}
+
+// Antrenman sırasında hareketi çıkar (kalıcı — programdan da silinir)
+async function removeWorkoutEx(exId){
+  const ex=exercises.find(e=>e.id===exId);
+  if(!ex)return;
+  if(!confirm(`"${ex.name}" hareketini bu antrenmandan ve programdan çıkarmak istediğine emin misin?`))return;
+  exercises=exercises.filter(e=>e.id!==exId);
+  workoutExercises=workoutExercises.filter(e=>e.id!==exId);
+  // Bu hareketin girilen verilerini temizle
+  for(let i=0;i<(ex.sets||0);i++){
+    delete workoutWeights[`${exId}_${i}`];
+    delete workoutReps[`${exId}_${i}`];
+    delete workoutDone[`${exId}_${i}`];
+  }
+  cacheAll();
+  showSync("syncing","⟳ Çıkarılıyor…");
+  try{
+    await sbDelete("exercises",`id=eq.${exId}`);
+    showSync("ok","✓ Çıkarıldı");
+  }catch(e){showSync("err","⚠ Hata");console.error(e);}
+  render();
 }
 
 // Antrenman sırasında set sayısını değiştir — kalıcı, sonraki idmanda da geçerli
