@@ -661,6 +661,8 @@ function buildExCard(ex,label){
   const isDur=ex.type==="duration";
   const hasTarget=ex.target_weight!=null && ex.target_weight!=="";
   const card=el("div","exCard");
+  card.id=`exCard_${ex.id}`;
+  card.style.scrollMarginTop="80px";
   let lastHtml="";
   if(last)lastHtml=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"><span style="font-size:11px;color:#555">Son (${last.date}):</span>${last.weights.map(w=>`<span class="wChip">${w} kg</span>`).join("")}</div>`;
   if(hasTarget)lastHtml+=`<div style="margin-top:4px"><span class="targetChip">🎯 Hedef: ${ex.target_weight} kg</span></div>`;
@@ -804,6 +806,8 @@ function buildExCard(ex,label){
       const k=this.dataset.key;workoutDone[k]=!workoutDone[k];
       this.textContent=workoutDone[k]?"✓":"○";this.classList.toggle("on",workoutDone[k]);
       this.closest('.setRow').style.opacity=workoutDone[k]?"0.45":"1";updateProgress();
+      // Bu hareketin tüm setleri tamamlandıysa bir sonraki harekete otomatik kay
+      if(workoutDone[k]) maybeScrollToNext(ex.id);
     });
   });
   card.querySelector('.targetToggle')?.addEventListener('change',function(){
@@ -958,6 +962,29 @@ async function saveTargetWeight(exId, val){
     cacheAll();
     showSync("ok", val?"✓ Hedef kaydedildi":"✓ Hedef kaldırıldı");
   }catch(e){showSync("err","⚠ Hata");console.error(e);}
+}
+
+// Bir hareketin tüm setleri tamamlandıysa bir sonraki (henüz bitmemiş) harekete yumuşakça kay
+function maybeScrollToNext(exId){
+  const ex=workoutExercises.find(e=>e.id===exId);
+  if(!ex)return;
+  // Bu hareketin tüm setleri bitti mi?
+  const allDone=Array.from({length:ex.sets},(_,i)=>workoutDone[`${exId}_${i}`]).every(Boolean);
+  if(!allDone)return;
+  // Sıradaki bitmemiş hareketi bul
+  const idx=workoutExercises.findIndex(e=>e.id===exId);
+  let nextEx=null;
+  for(let j=idx+1;j<workoutExercises.length;j++){
+    const e=workoutExercises[j];
+    const done=Array.from({length:e.sets},(_,i)=>workoutDone[`${e.id}_${i}`]).every(Boolean);
+    if(!done){nextEx=e;break;}
+  }
+  if(!nextEx)return;
+  // Kısa gecikmeyle (tik animasyonu görünsün) sonraki karta kay
+  setTimeout(()=>{
+    const el=document.getElementById(`exCard_${nextEx.id}`);
+    if(el)el.scrollIntoView({behavior:"smooth",block:"start"});
+  },350);
 }
 
 function updateProgress(){
